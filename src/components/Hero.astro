@@ -1,0 +1,76 @@
+---
+// First viewport: the sky is the stage. Left: what, how much, one button.
+// Right: a fan of real photos that leans toward the cursor.
+// The sun itself (in the WebGL sky) is clickable: evening preview.
+import { Image } from 'astro:assets';
+import living from '../assets/photos/a1-living.jpg';
+import bedroom from '../assets/photos/a3-bedroom.jpg';
+import kitchen from '../assets/photos/a2-kitchen.jpg';
+import WaLink from './WaLink.astro';
+import Icon from './Icon.astro';
+import { getDict, fmt, formatPrice } from '../i18n';
+import { PHONE, PRICE_FROM, RATING, LINKS } from '../data/site';
+import type { Lang } from '../data/apartments';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = getDict(lang);
+const g = t.greeting;
+const ratingValue = RATING.value.toFixed(1).replace('.', ',');
+const [priceBefore, priceAfter] = t.hero.price.split('{price}');
+const photos = [
+  { src: bedroom, alt: lang === 'ru' ? 'Светлая спальня' : 'Жарық жатын бөлме', depth: 0.6 },
+  { src: kitchen, alt: lang === 'ru' ? 'Кухня у окна' : 'Терезе жанындағы ас үй', depth: 1 },
+  { src: living, alt: lang === 'ru' ? 'Гостиная с бирюзовым диваном' : 'Көгілдір диваны бар қонақ бөлме', depth: 1.5 },
+];
+---
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero__copy">
+    <h1 id="hero-title" class="hero__title" data-split>{t.hero.title}</h1>
+    <p class="hero__lead" data-rise>
+      <span
+        class="hero__greeting"
+        data-greeting
+        data-morning={g.morning}
+        data-day={g.day}
+        data-evening={g.evening}
+        data-night={g.night}
+      >{g.fallback}</span>{' '}{t.hero.lead}
+    </p>
+    <p class="hero__price" data-rise>
+      <span class="hero__price-part">{priceBefore.trim()}</span>
+      <span class="hero__price-num" data-count={PRICE_FROM}>{formatPrice(PRICE_FROM)}</span>
+      <span class="hero__price-part">{priceAfter.trim()}</span>
+    </p>
+    <div class="hero__actions" data-rise>
+      <WaLink lang={lang} size="lg" />
+      <p class="hero__call">
+        {t.cta.callPrefix} <a href={PHONE.tel}>{PHONE.display}</a>
+      </p>
+    </div>
+    <a class="hero__rating" href={LINKS.twoGisReviews} target="_blank" rel="noopener" data-rise>
+      <Icon name="star" size={18} class="hero__star" />
+      {fmt(t.hero.rating, { value: ratingValue, votes: RATING.votes })}
+    </a>
+  </div>
+
+  <div class="hero__fan" data-fan role="group" aria-label={t.hero.photosLabel}>
+    {photos.map((photo, i) => (
+      <figure class="fan__card" data-depth={photo.depth} style={`--i:${i}`}>
+        <Image
+          src={photo.src}
+          alt={photo.alt}
+          widths={[420, 640, 900]}
+          sizes="(min-width: 1200px) 30vw, 60vw"
+          loading="eager"
+          fetchpriority={i === 2 ? 'high' : 'auto'}
+        />
+      </figure>
+    ))}
+  </div>
+
+  <button class="sun-hit" type="button" data-sun aria-label={t.clock.sunHint} title={t.clock.sunHint}></button>
+</section>

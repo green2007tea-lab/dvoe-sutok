@@ -1,0 +1,81 @@
+---
+// Three steps standing on the arc of the day like stations; the arc draws
+// itself with scroll and lights each station as it passes (motion.ts).
+// Dates only go into the WhatsApp text (booking.ts). No booking system.
+import WaLink from './WaLink.astro';
+import Text from './Text.astro';
+import { getDict } from '../i18n';
+import { CHECK_IN, CHECK_OUT } from '../data/site';
+import type { Lang } from '../data/apartments';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = getDict(lang).how;
+const MAX_GUESTS = 5;
+const guestOptions = Array.from({ length: MAX_GUESTS }, (_, i) => i + 1);
+---
+<section id="how" class="how" aria-labelledby="how-title">
+  <header class="section-head section-head--sky">
+    <h2 id="how-title" class="section-title" data-split>{t.title}</h2>
+  </header>
+
+  <div class="how__sheet">
+    <div class="how__arc-wrap">
+      <svg class="how__arc" viewBox="0 0 1000 220" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M20 200 C 260 10, 740 10, 980 200" data-arc />
+      </svg>
+      <ol class="steps">
+        <li class="step" data-step>
+          <span class="step__dot" aria-hidden="true"></span>
+          <p class="step__big" aria-hidden="true">24/7</p>
+          <h3 class="step__title">{t.steps[0].t}</h3>
+          <p class="step__text">{t.steps[0].d}</p>
+        </li>
+        <li class="step step--mid" data-step>
+          <span class="step__dot" aria-hidden="true"></span>
+          <h3 class="step__title">{t.steps[1].t}</h3>
+          <p class="step__text">{t.steps[1].d}</p>
+        </li>
+        <li class="step" data-step>
+          <span class="step__dot" aria-hidden="true"></span>
+          <div class="step__times">
+            <p class="step__big">
+              <span class="step__small">{t.checkIn}</span> <Text value={CHECK_IN} />
+            </p>
+            <p class="step__big">
+              <span class="step__small">{t.checkOut}</span> <Text value={CHECK_OUT} />
+            </p>
+          </div>
+          <h3 class="step__title">{t.steps[2].t}</h3>
+          <p class="step__text">{t.steps[2].d}</p>
+        </li>
+      </ol>
+    </div>
+
+    <form class="dates" data-dates-form novalidate>
+      <div class="dates__head">
+        <h3 class="dates__title">{t.form.title}</h3>
+        <p class="dates__text">{t.form.text}</p>
+      </div>
+      <label class="field">
+        <span class="field__label">{t.form.checkIn}</span>
+        <input class="field__input" type="date" name="checkIn" />
+      </label>
+      <label class="field">
+        <span class="field__label">{t.form.checkOut}</span>
+        <input class="field__input" type="date" name="checkOut" />
+      </label>
+      <label class="field">
+        <span class="field__label">{t.form.guests}</span>
+        <select class="field__input" name="guests">
+          <option value="">-</option>
+          {guestOptions.map((n) => <option value={String(n)}>{n}</option>)}
+        </select>
+      </label>
+      <WaLink lang={lang} />
+    </form>
+  </div>
+</section>

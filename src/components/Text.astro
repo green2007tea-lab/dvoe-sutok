@@ -1,0 +1,20 @@
+---
+// Renders a value that may still need the owner's confirmation.
+// With `tpl`, the value replaces {n}: <Text value={x} tpl="до {n} гостей" />.
+import { isTodo, plain, SHOW_TODO_MARKS, TODO_LABEL, type Maybe } from '../data/site';
+import { fmt } from '../i18n';
+
+interface Props {
+  value: Maybe;
+  tpl?: string;
+}
+
+const { value, tpl } = Astro.props;
+const text = tpl ? fmt(tpl, { n: plain(value) }) : plain(value);
+const marked = isTodo(value) && SHOW_TODO_MARKS;
+---
+{marked ? (
+  <mark class="todo" title={TODO_LABEL}>{text} <span class="todo__label">{TODO_LABEL}</span></mark>
+) : (
+  text
+)}

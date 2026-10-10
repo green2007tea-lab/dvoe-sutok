@@ -1,0 +1,50 @@
+---
+// Fixed header: logo, sections, the Almaty clock that runs with the scroll,
+// language switch. The clock is the page's time: now at the top, +24 h at the end.
+// Vector logo, traced from the 2GIS original: crisp at any size.
+import logoSvg from '../assets/logo.svg?raw';
+import { getDict } from '../i18n';
+import { withBase } from '../lib/paths';
+import type { Lang } from '../data/apartments';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = getDict(lang);
+const home = withBase(lang === 'ru' ? '/' : '/kz/');
+const phases = t.clock.phases;
+---
+<header class="header" data-header>
+  <a class="header__logo" href={home} aria-label="Двое суток">
+    <Fragment set:html={logoSvg} />
+  </a>
+
+  <nav class="header__nav" aria-label={t.nav.label}>
+    <a href="#apartments">{t.nav.apartments}</a>
+    <a href="#comfort">{t.nav.comfort}</a>
+    <a href="#how">{t.nav.how}</a>
+    <a href="#reviews">{t.nav.reviews}</a>
+    <a href="#contacts">{t.nav.contacts}</a>
+  </nav>
+
+  <div class="header__end">
+    <p
+      class="clock"
+      title={t.clock.hint}
+      data-clock
+      data-morning={phases.morning}
+      data-day={phases.day}
+      data-evening={phases.evening}
+      data-night={phases.night}
+    >
+      <span class="clock__time" data-clock-time>--:--</span>
+      <span class="clock__phase" data-clock-phase></span>
+    </p>
+    <a class="header__lang" href={withBase(t.langSwitch.href)} hreflang={t.langSwitch.hreflang} lang={t.langSwitch.hreflang}>
+      <span aria-hidden="true">{t.langSwitch.short}</span>
+      <span class="visually-hidden">{t.langSwitch.label}</span>
+    </a>
+  </div>
+</header>

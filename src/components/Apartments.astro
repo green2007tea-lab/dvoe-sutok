@@ -1,0 +1,97 @@
+---
+// Apartments ride sideways while the visitor scrolls down (pinned pan in motion.ts).
+// Each panel: a photo stage that swaps on thumbnail hover, big numbers, one button.
+import { Image } from 'astro:assets';
+import WaLink from './WaLink.astro';
+import Text from './Text.astro';
+import { getDict, fmt, formatPrice } from '../i18n';
+import { plain, todo } from '../data/site';
+import { APARTMENTS, PHOTOS_MATCH_CONFIRMED, type Apartment, type Lang } from '../data/apartments';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = getDict(lang);
+const a = t.apartments;
+
+/** Short plain label that goes into the WhatsApp message. */
+const waLabel = (apt: Apartment): string =>
+  [apt.street[lang], fmt(a.rooms, { n: plain(apt.rooms) }), fmt(a.area, { n: plain(apt.area) })].join(', ');
+
+const facts = (apt: Apartment) => [
+  { label: a.roomsLabel, value: apt.rooms },
+  { label: a.areaLabel, value: apt.area, unit: 'м²' },
+  { label: a.floorLabel, value: apt.floor },
+  { label: a.guestsLabel, value: apt.guests, prefix: lang === 'ru' ? 'до' : '' },
+];
+---
+<section id="apartments" class="apts" aria-labelledby="apartments-title">
+  <header class="section-head section-head--sky">
+    <h2 id="apartments-title" class="section-title" data-split>{a.title}</h2>
+    <p class="section-lead" data-rise>{a.lead}</p>
+  </header>
+
+  <div class="apts__pin" data-apts-pin>
+    <div class="apts__track" data-apts-track>
+      {APARTMENTS.map((apt, index) => (
+        <article class="apt" aria-labelledby={`apt-${apt.id}`} data-apt style={`--n:${index}`}>
+          <div class="apt__stage" data-stage>
+            <div class="apt__frames">
+              {apt.photos.map((photo, i) => (
+                <Image
+                  class:list={['apt__frame', { 'is-active': i === 0 }]}
+                  src={photo.src}
+                  alt={photo.alt[lang]}
+                  widths={[640, 960, 1280]}
+                  sizes="(min-width: 1200px) 44vw, 90vw"
+                  data-frame={i}
+                />
+              ))}
+            </div>
+            {apt.photos.length > 1 && (
+              <div class="apt__thumbs" role="group" aria-label={fmt(a.photoCount, { n: apt.photos.length })}>
+                {apt.photos.map((photo, i) => (
+                  <button class:list={['apt__thumb', { 'is-active': i === 0 }]} type="button" data-thumb={i} aria-label={photo.alt[lang]}>
+                    <Image src={photo.src} alt="" width={120} />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div class="apt__info">
+            {apt.availability && (
+              <p class="apt__note"><Text value={apt.availability[lang]} /></p>
+            )}
+            <h3 id={`apt-${apt.id}`} class="apt__street">{apt.street[lang]}</h3>
+            <dl class="apt__facts">
+              {facts(apt).map((fact) => (
+                <div class="apt__fact">
+                  <dt>{fact.label}</dt>
+                  <dd>
+                    {fact.prefix && <span class="apt__unit">{fact.prefix}</span>}
+                    <Text value={fact.value} />
+                    {fact.unit && <span class="apt__unit">{fact.unit}</span>}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <p class="apt__price">{fmt(a.price, { price: formatPrice(apt.price) })}</p>
+            <WaLink lang={lang} apartment={waLabel(apt)} />
+            {!PHOTOS_MATCH_CONFIRMED && (
+              <p class="apt__note apt__note--quiet"><Text value={todo(a.photoMatch)} /></p>
+            )}
+          </div>
+        </article>
+      ))}
+
+      <article class="apt apt--more" aria-labelledby="apt-more">
+        <h3 id="apt-more" class="apt__more-title">{a.moreTitle}</h3>
+        <p class="apt__more-text">{a.moreText}</p>
+        <WaLink lang={lang} tone="light" size="lg" />
+      </article>
+    </div>
+  </div>
+</section>

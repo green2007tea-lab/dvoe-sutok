@@ -1,0 +1,56 @@
+---
+// "What's inside" as a көрпе: a patchwork quilt of facts, two photos and a
+// guest's own words. Patches are stitched in as they arrive (motion.ts).
+import { Image } from 'astro:assets';
+import bed from '../assets/photos/a1-bed.jpg';
+import studio from '../assets/photos/a1-studio.jpg';
+import { getDict } from '../i18n';
+import type { Lang } from '../data/apartments';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = getDict(lang).comfort;
+// Grid area and cloth for each fact patch, in dictionary order. Four cloths
+// only, so the quilt reads as one piece of fabric, not a colour sampler.
+const CLOTH = [
+  { area: 'a', tone: 'green', role: 'lead' },
+  { area: 'b', tone: 'saffron' },
+  { area: 'c', tone: 'paper' },
+  { area: 'd', tone: 'paper' },
+  { area: 'e', tone: 'saffron' },
+  { area: 'f', tone: 'green' },
+  { area: 'g', tone: 'paper' },
+  { area: 'h', tone: 'pomegranate', role: 'wide' },
+] as const;
+const roleClass = (i: number): string => {
+  const cloth = CLOTH[i];
+  return 'role' in cloth ? `patch--${cloth.role}` : '';
+};
+---
+<section id="comfort" class="comfort" aria-labelledby="comfort-title">
+  <header class="section-head section-head--sky">
+    <h2 id="comfort-title" class="section-title" data-split>{t.title}</h2>
+  </header>
+
+  <div class="quilt" data-quilt>
+    {t.patches.map((patch, i) => (
+      <article class={`patch patch--${CLOTH[i].tone} ${roleClass(i)}`} style={`grid-area:${CLOTH[i].area}`} data-patch>
+        <h3 class="patch__title">{patch.t}</h3>
+        <p class="patch__text">{patch.d}</p>
+      </article>
+    ))}
+    <figure class="patch patch--photo" style="grid-area:p" data-patch>
+      <Image src={bed} alt={lang === 'ru' ? 'Кровать со свежим бельём' : 'Таза төсек-орын салынған төсек'} widths={[480, 800]} sizes="34vw" />
+    </figure>
+    <figure class="patch patch--photo" style="grid-area:s" data-patch>
+      <Image src={studio} alt={lang === 'ru' ? 'Комната с диваном и кроватью' : 'Диваны мен төсегі бар бөлме'} widths={[480, 800]} sizes="40vw" />
+    </figure>
+    <figure class="patch patch--pomegranate patch--quote" style="grid-area:q" data-patch>
+      <blockquote lang="ru"><p>«{t.quote}»</p></blockquote>
+      <figcaption>{t.quoteAuthor}</figcaption>
+    </figure>
+  </div>
+</section>

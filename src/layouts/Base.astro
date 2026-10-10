@@ -1,0 +1,59 @@
+---
+import '@fontsource-variable/unbounded';
+import '@fontsource-variable/onest';
+import '../styles/base.css';
+import '../styles/sections.css';
+import '../styles/closing.css';
+import '../styles/adapt.css';
+import { getDict } from '../i18n';
+import { withBase } from '../lib/paths';
+import type { Lang } from '../data/apartments';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = getDict(lang);
+const site = Astro.site ?? new URL('https://dvoesutok.kz');
+const ruUrl = new URL(withBase('/'), site).href;
+const kzUrl = new URL(withBase('/kz/'), site).href;
+// The demo build on GitHub Pages stays out of search until the owner approves.
+const noindex = import.meta.env.PUBLIC_NOINDEX === '1';
+---
+<!doctype html>
+<html lang={t.htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{t.meta.title}</title>
+    <meta name="description" content={t.meta.description} />
+    <meta name="theme-color" content="#1F8A70" />
+    <link rel="icon" type="image/png" href={withBase('/favicon.png')} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="canonical" href={lang === 'ru' ? ruUrl : kzUrl} />
+    <link rel="alternate" hreflang="ru" href={ruUrl} />
+    <link rel="alternate" hreflang="kk" href={kzUrl} />
+    <link rel="alternate" hreflang="x-default" href={ruUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={t.meta.title} />
+    <meta property="og:description" content={t.meta.description} />
+    <meta property="og:locale" content={lang === 'ru' ? 'ru_KZ' : 'kk_KZ'} />
+    <script is:inline>
+      // Hero waits for its entrance only when motion is welcome; never longer than 2.5 s.
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('intro');
+        setTimeout(function () { document.documentElement.classList.remove('intro'); }, 2500);
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{t.skipLink}</a>
+    <slot />
+    <script type="application/json" id="wa-strings" set:html={JSON.stringify({ wa: t.wa, months: t.months })} />
+    <script>
+      import '../scripts/booking.ts';
+      import '../scripts/motion.ts';
+    </script>
+  </body>
+</html>

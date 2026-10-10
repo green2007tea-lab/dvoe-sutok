@@ -1,0 +1,27 @@
+---
+// Inline Phosphor icons (one family, one weight per use). No hand-drawn glyphs.
+import whatsapp from '@phosphor-icons/core/assets/fill/whatsapp-logo-fill.svg?raw';
+import key from '@phosphor-icons/core/assets/fill/key-fill.svg?raw';
+import star from '@phosphor-icons/core/assets/fill/star-fill.svg?raw';
+import phone from '@phosphor-icons/core/assets/regular/phone.svg?raw';
+import arrowLeft from '@phosphor-icons/core/assets/regular/arrow-left.svg?raw';
+import arrowRight from '@phosphor-icons/core/assets/regular/arrow-right.svg?raw';
+import telegram from '@phosphor-icons/core/assets/regular/telegram-logo.svg?raw';
+import mapPin from '@phosphor-icons/core/assets/regular/map-pin.svg?raw';
+
+const ICONS = { whatsapp, key, star, phone, arrowLeft, arrowRight, telegram, mapPin } as const;
+export type IconName = keyof typeof ICONS;
+
+interface Props {
+  name: IconName;
+  size?: number;
+  class?: string;
+}
+
+const { name, size = 20, class: className = 'icon' } = Astro.props;
+const svg = ICONS[name].replace(
+  '<svg ',
+  `<svg width="${size}" height="${size}" aria-hidden="true" focusable="false" class="${className}" `,
+);
+---
+<Fragment set:html={svg} />

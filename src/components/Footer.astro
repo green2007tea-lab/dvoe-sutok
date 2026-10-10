@@ -1,0 +1,29 @@
+---
+// The day has come full circle: the clock is back at the visitor's own time.
+// Mobile keeps a bottom bar with the one button; desktop hides it.
+import WaLink from './WaLink.astro';
+import { getDict } from '../i18n';
+import { PHONE } from '../data/site';
+import type { Lang } from '../data/apartments';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = getDict(lang);
+const year = new Date().getFullYear();
+---
+<footer class="footer">
+  <p class="footer__wrap" data-split>{t.footer.wrap}</p>
+  <div class="footer__row">
+    <p>{t.footer.tagline}</p>
+    <a href={PHONE.tel}>{PHONE.display}</a>
+    <p class="footer__copy">© {year} «Двое суток»</p>
+  </div>
+</footer>
+
+<div class="bottom-bar">
+  <WaLink lang={lang} block />
+  <a class="bottom-bar__call" href={PHONE.tel}>{t.cta.callShort}</a>
+</div>

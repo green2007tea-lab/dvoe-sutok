@@ -1,0 +1,59 @@
+---
+// One guest at a time, large, in their own language. Prev/next swap the quote
+// with a short blur crossfade (motion.ts). All reviews stay in the DOM.
+import Icon from './Icon.astro';
+import { getDict, fmt } from '../i18n';
+import { REVIEWS } from '../data/reviews';
+import { LINKS, RATING } from '../data/site';
+import type { Lang } from '../data/apartments';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const dict = getDict(lang);
+const t = dict.reviews;
+const ratingValue = RATING.value.toFixed(1).replace('.', ',');
+const dateFormat = new Intl.DateTimeFormat(dict.intlLocale, { month: 'long', year: 'numeric' });
+---
+<section id="reviews" class="reviews" aria-labelledby="reviews-title">
+  <div class="reviews__sheet">
+    <div class="reviews__side">
+      <h2 id="reviews-title" class="section-title" data-split>{t.title}</h2>
+      <p class="reviews__score">
+        <span class="reviews__score-num" data-count-decimal={RATING.value}>{ratingValue}</span>
+        <span class="reviews__stars" aria-hidden="true">
+          {Array.from({ length: 5 }, () => <Icon name="star" size={20} />)}
+        </span>
+      </p>
+      <p class="reviews__summary">{fmt(t.summary, { value: ratingValue, votes: RATING.votes })}</p>
+      <a class="link-arrow" href={LINKS.twoGisReviews} target="_blank" rel="noopener">
+        {fmt(t.all, { n: RATING.reviews })}
+        <Icon name="arrowRight" size={18} />
+      </a>
+    </div>
+
+    <div class="reviews__stage" data-reviews>
+      <div class="reviews__slides" aria-live="polite">
+        {REVIEWS.map((review, i) => (
+          <figure class="review" data-review hidden={i !== 0}>
+            <blockquote class="review__text" lang={review.lang}>
+              <p>«{review.text}»</p>
+            </blockquote>
+            <figcaption class="review__author">
+              <span class="review__name">{review.name}</span>
+              <time datetime={review.date}>{dateFormat.format(new Date(review.date))}</time>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+      <div class="reviews__controls">
+        <button class="round-btn" type="button" data-review-prev aria-label={t.prev}><Icon name="arrowLeft" size={22} /></button>
+        <button class="round-btn" type="button" data-review-next aria-label={t.next}><Icon name="arrowRight" size={22} /></button>
+        <p class="reviews__count" aria-hidden="true"><span data-review-index>1</span> / {REVIEWS.length}</p>
+        <p class="reviews__note">{t.originalNote}</p>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,118 @@
+/* ---------- narrow screens: a calm single column (desktop is the focus) ---------- */
+
+@media (max-width: 999px) {
+  body {
+    padding-bottom: 88px;
+  }
+  .header {
+    inset: 10px 12px auto;
+    grid-template-columns: auto 1fr auto;
+  }
+  .header__nav {
+    display: none;
+  }
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding-top: 110px;
+  }
+  .hero__copy,
+  .hero__fan {
+    grid-column: 1;
+  }
+  .hero__fan {
+    height: 420px;
+  }
+  .apts__pin {
+    height: auto;
+    overflow: visible;
+  }
+  .apts__track {
+    flex-direction: column;
+    width: 100%;
+  }
+  .apt,
+  .apt--more {
+    width: 100%;
+    height: auto;
+    grid-template-columns: 1fr;
+  }
+  .apt__stage {
+    aspect-ratio: 4 / 3;
+  }
+  .apt__info,
+  .apt--more {
+    padding: 28px;
+  }
+  .quilt {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: none;
+  }
+  .quilt > * {
+    grid-area: auto !important;
+  }
+  .how__sheet,
+  .reviews__sheet,
+  .faq__grid {
+    grid-template-columns: 1fr;
+    padding: 28px;
+  }
+  .steps {
+    grid-template-columns: 1fr;
+  }
+  .step {
+    padding-top: 0;
+    justify-items: start;
+    text-align: left;
+  }
+  .step__dot {
+    display: none;
+  }
+  .apts__track {
+    padding: 0 var(--gutter);
+  }
+  .how__arc {
+    display: none;
+  }
+  .contacts__panel {
+    grid-template-columns: 1fr;
+    padding: 48px 28px;
+  }
+  .contacts__now {
+    justify-items: start;
+    text-align: left;
+  }
+  .contacts__now-label {
+    justify-content: flex-start;
+  }
+  .bottom-bar {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px max(12px, env(safe-area-inset-bottom));
+    background: rgb(244 248 246 / 0.92);
+    backdrop-filter: blur(12px);
+  }
+  .bottom-bar__call {
+    flex: none;
+    font-weight: 600;
+  }
+}
+
+/* ---------- reduced motion: gentle fades only ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-property: opacity, color, background-color !important;
+  }
+  .patch::before {
+    clip-path: none;
+  }
+}

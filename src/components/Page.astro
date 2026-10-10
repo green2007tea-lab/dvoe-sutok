@@ -1,0 +1,35 @@
+---
+// The one-page site, shared by / (ru) and /kz/ (kz).
+// The fixed sky canvas sits behind everything; content scrolls over it.
+import Base from '../layouts/Base.astro';
+import Header from './Header.astro';
+import Hero from './Hero.astro';
+import Apartments from './Apartments.astro';
+import Comfort from './Comfort.astro';
+import How from './How.astro';
+import Reviews from './Reviews.astro';
+import Faq from './Faq.astro';
+import Contacts from './Contacts.astro';
+import Footer from './Footer.astro';
+import type { Lang } from '../data/apartments';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+---
+<Base lang={lang}>
+  <canvas class="sky" data-sky-canvas aria-hidden="true"></canvas>
+  <Header lang={lang} />
+  <main id="main">
+    <Hero lang={lang} />
+    <Apartments lang={lang} />
+    <Comfort lang={lang} />
+    <How lang={lang} />
+    <Reviews lang={lang} />
+    <Faq lang={lang} />
+    <Contacts lang={lang} />
+  </main>
+  <Footer lang={lang} />
+</Base>

@@ -1,0 +1,106 @@
+---
+// The closing panel: brand green field, one big promise, one button.
+// Beside the promise: a large sun by day or moon by night (real Almaty time),
+// leaning a little with the cursor, and the live clock under it.
+// The only marquee on the page carries the places the company lists as nearby.
+import WaLink from './WaLink.astro';
+import Icon from './Icon.astro';
+import { getDict } from '../i18n';
+import { LINKS, PHONE } from '../data/site';
+import type { Lang } from '../data/apartments';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const dict = getDict(lang);
+const t = dict.night;
+// The sun: 16 rays, long and short in turn. The moon: a few stars around it.
+const RAYS = Array.from({ length: 16 }, (_, i) => i * 22.5);
+const STARS: ReadonlyArray<readonly [number, number, number]> = [
+  [-78, -58, 2.2], [70, -74, 1.6], [84, 30, 2], [-66, 62, 1.5], [44, 80, 1.8], [-90, 8, 1.3],
+];
+---
+<section id="contacts" class="contacts" aria-labelledby="contacts-title">
+  <div class="contacts__panel">
+    <div class="contacts__main">
+      <h2 id="contacts-title" class="contacts__title" data-split>{t.title}</h2>
+      <p class="contacts__text" data-rise>{t.text}</p>
+      <div class="contacts__actions" data-rise>
+        <WaLink lang={lang} tone="light" size="lg" />
+        <a class="contacts__phone" href={PHONE.tel}>
+          <Icon name="phone" size={22} />
+          {PHONE.display}
+        </a>
+      </div>
+      <p class="contacts__links">
+        <a href={LINKS.twoGis} target="_blank" rel="noopener"><Icon name="mapPin" size={18} />{t.twoGis}</a>
+        <a href={LINKS.telegram} target="_blank" rel="noopener"><Icon name="telegram" size={18} />{t.telegram}</a>
+      </p>
+    </div>
+    <div class="contacts__now" aria-hidden="true" data-now>
+      <div class="contacts__body" data-now-body>
+        <svg class="sky-body" viewBox="-100 -100 200 200">
+          <defs>
+            <radialGradient id="body-halo-sun">
+              <stop offset="0.3" stop-color="#ffd27a" stop-opacity="0.5" />
+              <stop offset="0.6" stop-color="#f4b43c" stop-opacity="0.14" />
+              <stop offset="1" stop-color="#f4b43c" stop-opacity="0" />
+            </radialGradient>
+            <radialGradient id="body-halo-moon">
+              <stop offset="0.3" stop-color="#e8f4ef" stop-opacity="0.28" />
+              <stop offset="1" stop-color="#e8f4ef" stop-opacity="0" />
+            </radialGradient>
+            <radialGradient id="body-sun-core" cx="0.38" cy="0.36" r="0.75">
+              <stop offset="0" stop-color="#fff7da" />
+              <stop offset="0.5" stop-color="#ffd062" />
+              <stop offset="1" stop-color="#ee9f2a" />
+            </radialGradient>
+            <radialGradient id="body-moon-face" cx="0.32" cy="0.34" r="0.85">
+              <stop offset="0" stop-color="#ffffff" />
+              <stop offset="1" stop-color="#d3e2dc" />
+            </radialGradient>
+            <mask id="body-crescent">
+              <circle r="46" fill="#fff" />
+              <circle r="42" cx="22" cy="-15" fill="#000" />
+            </mask>
+          </defs>
+          <circle class="sky-body__halo" r="98" />
+          <g class="sky-body__sun">
+            <g class="sky-body__rays">
+              {RAYS.map((angle, i) => (
+                <line x1="0" y1="-56" x2="0" y2={i % 2 ? -68 : -78} transform={`rotate(${angle})`} />
+              ))}
+            </g>
+            <circle class="sky-body__core" r="44" />
+          </g>
+          <g class="sky-body__moon">
+            {STARS.map(([x, y, r], i) => <circle class="sky-body__star" cx={x} cy={y} r={r} style={`--d:${i * 0.6}s`} />)}
+            <g mask="url(#body-crescent)">
+              <circle class="sky-body__face" r="46" />
+              <circle class="sky-body__crater" r="7" cx="-18" cy="10" />
+              <circle class="sky-body__crater" r="4.5" cx="-8" cy="-22" />
+              <circle class="sky-body__crater" r="3.5" cx="-26" cy="-6" />
+            </g>
+          </g>
+        </svg>
+      </div>
+      <p class="contacts__now-label"><span class="contacts__live"></span>{t.now}</p>
+      <p class="contacts__now-time">
+        <span data-now-hh>--</span><span class="contacts__colon">:</span><span data-now-mm>--</span>
+      </p>
+    </div>
+  </div>
+
+  <div class="marquee" aria-label={t.nearby}>
+    <p class="marquee__label">{t.nearby}</p>
+    <div class="marquee__track" data-marquee>
+      {[0, 1].map((copy) => (
+        <ul class="marquee__list" aria-hidden={copy === 1 ? 'true' : undefined}>
+          {t.nearbyPlaces.map((place) => <li>{place}</li>)}
+        </ul>
+      ))}
+    </div>
+  </div>
+</section>

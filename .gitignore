@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.astro/
+
+# Working notes and raw sources stay on this computer, not in the public repo
+facts.md
+research.md
+questions.md
+source/
+.claude/
+skills-lock.json

@@ -1,0 +1,36 @@
+---
+// The one target action: a WhatsApp link with a prefilled message.
+// On press the WhatsApp mark turns into a key that turns in the lock (motion.ts).
+// booking.ts rewrites href when the visitor picks dates (data-wa-apartment kept).
+import Icon from './Icon.astro';
+import { getDict } from '../i18n';
+import { buildWaText, waHref } from '../lib/wa';
+import type { Lang } from '../data/apartments';
+
+interface Props {
+  lang: Lang;
+  apartment?: string;
+  tone?: 'brand' | 'light';
+  size?: 'md' | 'lg';
+  block?: boolean;
+}
+
+const { lang, apartment = '', tone = 'brand', size = 'md', block = false } = Astro.props;
+const t = getDict(lang);
+const href = waHref(buildWaText(t.wa, { apartment }));
+---
+<a
+  class:list={['btn', `btn--${tone}`, `btn--${size}`, { 'btn--block': block }]}
+  href={href}
+  target="_blank"
+  rel="noopener"
+  data-wa
+  data-wa-apartment={apartment}
+  data-magnetic
+>
+  <span class="btn__icons" aria-hidden="true">
+    <Icon name="whatsapp" size={22} class="btn__icon btn__icon--wa" />
+    <Icon name="key" size={22} class="btn__icon btn__icon--key" />
+  </span>
+  <span class="btn__label">{t.cta.whatsapp}</span>
+</a>

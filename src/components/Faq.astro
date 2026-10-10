@@ -1,0 +1,34 @@
+---
+// Native <details>: works without JS; height opens smoothly via CSS where supported.
+import Text from './Text.astro';
+import { getDict } from '../i18n';
+import type { Lang } from '../data/apartments';
+
+interface Props {
+  lang: Lang;
+}
+
+const t = getDict(Astro.props.lang).faq;
+const half = Math.ceil(t.items.length / 2);
+const columns = [t.items.slice(0, half), t.items.slice(half)];
+---
+<section id="faq" class="faq" aria-labelledby="faq-title">
+  <header class="section-head section-head--sky">
+    <h2 id="faq-title" class="section-title" data-split>{t.title}</h2>
+  </header>
+  <div class="faq__grid">
+    {columns.map((items) => (
+      <div class="faq__col">
+        {items.map((item) => (
+          <details class="faq__item" name="faq">
+            <summary class="faq__q">
+              <span>{item.q}</span>
+              <span class="faq__plus" aria-hidden="true"></span>
+            </summary>
+            <p class="faq__a"><Text value={item.a} /></p>
+          </details>
+        ))}
+      </div>
+    ))}
+  </div>
+</section>
