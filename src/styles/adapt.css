@@ -37,7 +37,7 @@
     align-content: start;
     gap: 36px;
     min-height: 100svh;
-    padding: calc(108px + env(safe-area-inset-top, 0px)) var(--gutter) 40px;
+    padding: calc(108px + env(safe-area-inset-top, 0px)) var(--gutter) 8px;
     overflow-x: clip; /* the tilted photos must never widen the page */
   }
   .hero__copy,
@@ -84,7 +84,7 @@
     font-size: 14px;
   }
   .hero__fan {
-    height: min(96vw, 380px);
+    height: min(84vw, 330px);
   }
   .fan__card {
     width: 56%;
@@ -114,7 +114,7 @@
 
   /* apartments: a native swipe row, the next card peeks in */
   .apts {
-    padding-top: 72px;
+    padding-top: 40px;
   }
   .apts__pin {
     height: auto;
@@ -193,12 +193,14 @@
     justify-content: center;
   }
   .apt--more {
+    grid-template-columns: minmax(0, 1fr); /* the button must not widen the card */
     align-content: end;
-    padding: 32px 24px;
+    justify-items: stretch;
+    padding: 28px 22px;
     min-height: 420px;
   }
   .apt__more-title {
-    font-size: 32px;
+    font-size: clamp(24px, 7vw, 30px);
   }
   .apt__more-text {
     font-size: 17px;
@@ -285,15 +287,15 @@
   }
   .steps {
     grid-template-columns: minmax(0, 1fr);
-    gap: 28px;
-    padding: 0 0 0 34px;
+    gap: 32px;
+    padding: 0 0 0 58px;
   }
   .steps::before {
     content: '';
     position: absolute;
-    left: 8px;
-    top: 10px;
-    bottom: 10px;
+    left: 21px;
+    top: 22px;
+    bottom: 22px;
     width: 2px;
     border-radius: 2px;
     background: var(--saffron);
@@ -305,11 +307,9 @@
     gap: 8px;
   }
   .step__dot {
-    left: -34px;
-    top: 4px;
+    left: -58px;
+    top: -6px;
     margin: 0;
-    background: var(--saffron);
-    box-shadow: inset 0 0 0 3px var(--saffron), 0 0 0 6px rgb(244 180 60 / 0.2);
   }
   .step__times {
     display: flex;

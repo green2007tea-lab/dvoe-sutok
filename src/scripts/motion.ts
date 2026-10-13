@@ -348,10 +348,19 @@ function stepsArc(): void {
         start: 'top 80%',
         end: 'center 45%',
         scrub: 1,
-        onUpdate: (self) => steps.forEach((step, i) => step.classList.toggle('is-lit', self.progress >= (stations[i] ?? 1) - 0.02)),
+        onUpdate: (self) => {
+          if (!stations.length) return; // phones have no arc: see below
+          steps.forEach((step, i) => step.classList.toggle('is-lit', self.progress >= (stations[i] ?? 1) - 0.02));
+        },
       },
     });
   }
+  // Phones: the timeline lights each station as it scrolls into view.
+  gsap.matchMedia().add('(max-width: 999px)', () => {
+    steps.forEach((step) => {
+      ScrollTrigger.create({ trigger: step, start: 'top 70%', once: true, onEnter: () => step.classList.add('is-lit') });
+    });
+  });
   gsap.from('.step', {
     y: 40,
     opacity: 0,

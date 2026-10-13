@@ -48,7 +48,9 @@ float fbm(vec2 p) {
   float a = 0.5;
   for (int i = 0; i < 5; i++) {
     v += a * noise(p);
-    p = p * 2.03 + 17.1;
+    // small offsets keep coordinates low: phone GPUs (mediump) turn large
+    // values into visible blocks
+    p = p * 2.03 + vec2(1.7, 2.9);
     a *= 0.5;
   }
   return v;
@@ -161,7 +163,9 @@ export interface SkyRenderer {
 
 const MAX_DPR = 2; // full resolution: stars, moon and ridges stay sharp
 // Phones have dense screens and small GPUs: 1.5x is sharp there and saves battery.
-const MAX_DPR_TOUCH = 1.5;
+const MAX_DPR_TOUCH = 2;
+// Time wraps so shader coordinates stay small on low-precision phone GPUs.
+const TIME_WRAP_S = 600;
 const MOUSE_EASE = 0.06;
 const VEL_EASE = 0.08;
 const IDLE_MS = 600; // after this long without input the sky breathes at half rate
@@ -259,8 +263,10 @@ export function createSky(canvas: HTMLCanvasElement, options: { reduce: boolean 
   const resize = (): void => {
     const cap = window.matchMedia('(pointer: coarse)').matches ? MAX_DPR_TOUCH : MAX_DPR;
     scale = Math.min(window.devicePixelRatio || 1, cap);
-    canvas.width = Math.round(window.innerWidth * scale);
-    canvas.height = Math.round(window.innerHeight * scale);
+    // the canvas CSS size is the largest viewport (100lvh): the sky still fills
+    // the screen when a phone's address bar slides away
+    canvas.width = Math.round((canvas.clientWidth || window.innerWidth) * scale);
+    canvas.height = Math.round((canvas.clientHeight || window.innerHeight) * scale);
     gl.viewport(0, 0, canvas.width, canvas.height);
   };
   resize();
@@ -282,7 +288,7 @@ export function createSky(canvas: HTMLCanvasElement, options: { reduce: boolean 
     mouse.y += (mouse.ty - mouse.y) * MOUSE_EASE;
     vel += (velTarget - vel) * VEL_EASE;
     gl.uniform2f(loc.res, canvas.width, canvas.height);
-    gl.uniform1f(loc.time, (performance.now() - startTime) / 1000);
+    gl.uniform1f(loc.time, ((performance.now() - startTime) / 1000) % TIME_WRAP_S);
     gl.uniform3fv(loc.top, sky.top);
     gl.uniform3fv(loc.horizon, sky.horizon);
     gl.uniform3fv(loc.glow, sky.glow);

@@ -218,7 +218,7 @@ export function placeStations(): number[] {
     const point = pointAtX(path, x);
     const y = (point.y / view.height) * height - top;
     step.style.setProperty('--dot-y', `${y.toFixed(1)}px`);
-    step.style.setProperty('--station', `${(y + 44).toFixed(1)}px`);
+    step.style.setProperty('--station', `${(y + 58).toFixed(1)}px`);
     // the arc is symmetric and drawn by length; its x share is close enough
     return Math.min(1, Math.max(0, x / view.width));
   });

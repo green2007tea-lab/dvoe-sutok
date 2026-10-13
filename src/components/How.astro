@@ -1,9 +1,11 @@
 ---
 // Three steps standing on the arc of the day like stations; the arc draws
 // itself with scroll and lights each station as it passes (motion.ts).
+// Each station has its own sign: write to us, see the photos, take the key.
 // Dates only go into the WhatsApp text (booking.ts). No booking system.
 import WaLink from './WaLink.astro';
 import Text from './Text.astro';
+import Icon from './Icon.astro';
 import { getDict } from '../i18n';
 import { CHECK_IN, CHECK_OUT } from '../data/site';
 import type { Lang } from '../data/apartments';
@@ -29,18 +31,18 @@ const guestOptions = Array.from({ length: MAX_GUESTS }, (_, i) => i + 1);
       </svg>
       <ol class="steps">
         <li class="step" data-step>
-          <span class="step__dot" aria-hidden="true"></span>
+          <span class="step__dot" aria-hidden="true"><Icon name="chat" size={20} /></span>
           <p class="step__big" aria-hidden="true">24/7</p>
           <h3 class="step__title">{t.steps[0].t}</h3>
           <p class="step__text">{t.steps[0].d}</p>
         </li>
         <li class="step step--mid" data-step>
-          <span class="step__dot" aria-hidden="true"></span>
+          <span class="step__dot" aria-hidden="true"><Icon name="images" size={20} /></span>
           <h3 class="step__title">{t.steps[1].t}</h3>
           <p class="step__text">{t.steps[1].d}</p>
         </li>
         <li class="step" data-step>
-          <span class="step__dot" aria-hidden="true"></span>
+          <span class="step__dot" aria-hidden="true"><Icon name="key" size={20} /></span>
           <div class="step__times">
             <p class="step__big">
               <span class="step__small">{t.checkIn}</span> <Text value={CHECK_IN} />
