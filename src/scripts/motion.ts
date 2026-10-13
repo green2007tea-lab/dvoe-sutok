@@ -409,6 +409,18 @@ function bottomBar(): void {
   own.forEach((el) => observer.observe(el));
 }
 
+/** The pile of photos on the «another apartment» card fans out when seen. */
+function morePile(): void {
+  const card = document.querySelector<HTMLElement>('[data-more]');
+  if (!card) return;
+  const observer = new IntersectionObserver(([entry]) => {
+    if (!entry.isIntersecting) return;
+    card.classList.add('is-seen');
+    observer.disconnect();
+  }, { threshold: 0.35 });
+  observer.observe(card);
+}
+
 function header(): void {
   const el = document.querySelector<HTMLElement>('[data-header]');
   if (!el) return;
@@ -429,6 +441,7 @@ function boot(): void {
   initStages();
   initReviews(reduce);
   bottomBar();
+  morePile();
 
   if (reduce) {
     header();

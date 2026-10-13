@@ -2,6 +2,10 @@
 // Apartments ride sideways while the visitor scrolls down (pinned pan in motion.ts).
 // Each panel: a photo stage that swaps on thumbnail hover, big numbers, one button.
 import { Image } from 'astro:assets';
+import print1 from '../assets/photos/a2-bed.jpg';
+import print2 from '../assets/photos/a1-studio.jpg';
+import print3 from '../assets/photos/a2-kitchen.jpg';
+import print4 from '../assets/photos/a3-bedroom.jpg';
 import WaLink from './WaLink.astro';
 import Text from './Text.astro';
 import { getDict, fmt, formatPrice } from '../i18n';
@@ -89,7 +93,15 @@ const facts = (apt: Apartment) => [
         </article>
       ))}
 
-      <article class="apt apt--more" aria-labelledby="apt-more">
+      <article class="apt apt--more" aria-labelledby="apt-more" data-more>
+        {/* a little pile of other apartments: they fan out when the card is seen */}
+        <div class="more__prints" aria-hidden="true">
+          {[print1, print2, print3, print4].map((src, i) => (
+            <figure class="more__print" style={`--i:${i}`}>
+              <Image src={src} alt="" widths={[240, 360]} sizes="180px" loading="lazy" />
+            </figure>
+          ))}
+        </div>
         <h3 id="apt-more" class="apt__more-title">{a.moreTitle}</h3>
         <p class="apt__more-text">{a.moreText}</p>
         <WaLink lang={lang} tone="light" size="lg" />

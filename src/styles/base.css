@@ -42,6 +42,22 @@
   color-scheme: light;
 }
 
+/* Kazakh: Unbounded lacks ә ғ қ ң ө ұ ү һ, so the display face changes as a
+   whole instead of mixing two fonts inside one word. Montserrat is a little
+   lighter, so display text goes one weight up. */
+html[lang='kk'] {
+  --font-display: 'Montserrat Variable', 'Onest Variable', sans-serif;
+}
+html[lang='kk'] :is(
+  .hero__title, .hero__price-num, .section-title, .apt__street, .apt__fact dd,
+  .apt__more-title, .patch__title, .patch--quote blockquote p, .step__big,
+  .step__title, .dates__title, .reviews__score-num, .contacts__title,
+  .contacts__phone, .contacts__now-time, .marquee__list li, .footer__wrap
+) {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
 html[data-sky='dark'] {
   --sky-ink: #f3f7f5;
   --sky-ink-soft: rgb(243 247 245 / 0.84);

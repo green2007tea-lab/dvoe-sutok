@@ -195,10 +195,8 @@
     justify-content: center;
   }
   .apt--more {
-    grid-template-columns: minmax(0, 1fr); /* the button must not widen the card */
-    grid-template-rows: none;
-    align-content: end;
-    justify-items: stretch;
+    align-items: stretch; /* full-width button, never wider than the card */
+    min-width: 0;
     /* the button lines up with the apartment cards, whose note sits below it */
     padding: 28px 22px 56px;
     min-height: 420px;
@@ -206,6 +204,23 @@
   .apt__more-title {
     font-size: clamp(24px, 7vw, 30px);
   }
+  /* the pile of photos fills the empty top of the card, centred in it */
+  .more__prints {
+    height: clamp(190px, 54vw, 250px);
+    margin: auto 0;
+  }
+  .more__print {
+    width: 52%;
+    padding: 5px;
+    border-radius: 14px;
+  }
+  .more__print img {
+    border-radius: 10px;
+  }
+  .is-seen .more__print:nth-child(1) { --x: -4%; --y: 66%; --r: -9deg; }
+  .is-seen .more__print:nth-child(2) { --x: 30%; --y: 26%; --r: -3deg; }
+  .is-seen .more__print:nth-child(3) { --x: 62%; --y: 62%; --r: 5deg; }
+  .is-seen .more__print:nth-child(4) { --x: 90%; --y: 22%; --r: 10deg; }
   .apt__more-text {
     font-size: 17px;
   }
