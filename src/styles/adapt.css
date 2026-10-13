@@ -505,6 +505,31 @@
   }
 }
 
+/* Phones: no live blur over the moving sky. Backdrop blur re-renders every
+   frame the sky changes, the heaviest job on a phone GPU; dense tints read
+   the same at a glance. */
+@media (max-width: 999px), (pointer: coarse) {
+  .header.is-scrolled,
+  .bottom-bar,
+  .how__sheet,
+  .hero__rating {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .header.is-scrolled {
+    background: rgb(244 248 246 / 0.95);
+  }
+  html[data-sky='dark'] .header.is-scrolled {
+    background: rgb(10 30 36 / 0.92);
+  }
+  .bottom-bar {
+    background: rgb(10 30 36 / 0.94);
+  }
+  .how__sheet {
+    background: rgb(244 248 246 / 0.96);
+  }
+}
+
 /* touch: no grey flash, no 300ms wait, controls are not text to select */
 @media (pointer: coarse) {
   html {

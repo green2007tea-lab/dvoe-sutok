@@ -28,19 +28,21 @@ uniform float uScroll;
 uniform float uVel;
 uniform float uPulse;
 uniform float uPx; // device pixels per CSS pixel
+uniform sampler2D uNoise; // 256x256, tiles: r = white noise, g = smooth noise
+uniform vec2 uGrain; // a new random offset each frame for the film grain
 
-float hash(vec2 p) {
-  p = fract(p * vec2(123.34, 456.21));
-  p += dot(p, p + 45.32);
-  return fract(p.x * p.y);
+// Noise is read from a texture, not computed: phone GPUs with low float
+// precision broke the arithmetic hash into soft squares, and a lookup is cheaper.
+const float TEX = 256.0;
+
+// Random value of one integer cell (stars, grain).
+float hash(vec2 cell) {
+  return texture2D(uNoise, (mod(cell, TEX) + 0.5) / TEX).r;
 }
 
+// Smooth noise: one unit is about four texels of the pre-blurred field.
 float noise(vec2 p) {
-  vec2 i = floor(p);
-  vec2 f = fract(p);
-  vec2 u = f * f * (3.0 - 2.0 * f);
-  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),
-             mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+  return texture2D(uNoise, p * (4.0 / TEX)).g;
 }
 
 float fbm(vec2 p) {
@@ -61,7 +63,8 @@ float ridge(float x) {
   float v = 0.0;
   float a = 0.55;
   for (int i = 0; i < 4; i++) {
-    float n = 1.0 - abs(noise(vec2(x, 3.1)) * 2.0 - 1.0);
+    // texture noise is softer than the old hash: a finer step keeps sharp peaks
+    float n = 1.0 - abs(noise(vec2(x * 1.9, 3.1)) * 2.0 - 1.0);
     v += a * n * n;
     x = x * 2.1 + 5.3;
     a *= 0.45;
@@ -122,7 +125,7 @@ void main() {
     float x = uv.x * aspect;
     float rx = x * 0.9 + 3.7 + uScroll * 0.12;
     float rh = ridge(rx);
-    float far = 0.12 + 0.24 * rh;
+    float far = 0.1 + 0.34 * rh;
     float near = 0.03 + 0.06 * fbm(vec2(x * 1.7 + 11.0 + uScroll * 0.3, 7.0));
     float farMask = 1.0 - smoothstep(far - aa * 0.5, far + aa * 0.5, uv.y);
     float nearMask = 1.0 - smoothstep(near - aa * 0.5, near + aa * 0.5, uv.y);
@@ -132,7 +135,7 @@ void main() {
     float crest = smoothstep(far - 0.09, far - 0.01, uv.y);
     float lit = mix(0.5, clamp(0.5 + slope * 5.0 * clamp((uBody.x * aspect - x) * 6.0, -1.0, 1.0), 0.0, 1.0), crest);
     vec3 farCol = mix(mix(uHorizon, uTop, 0.5), uHorizon, 0.45) * mix(0.72, 0.92, lit);
-    float snow = smoothstep(0.6, 0.85, rh) * smoothstep(far - 0.07, far - 0.012, uv.y);
+    float snow = smoothstep(0.45, 0.68, rh) * smoothstep(far - 0.07, far - 0.012, uv.y);
     vec3 snowCol = mix(vec3(0.95, 0.97, 1.0), uGlow, 0.3) * mix(0.55, 1.0, uIsSun) * mix(0.8, 1.05, lit);
     farCol = mix(farCol, snowCol, snow * 0.8);
     // haze gathers in the valley above the foothills
@@ -143,7 +146,7 @@ void main() {
   }
 
   // Fine grain keeps the gradients from banding.
-  col += (hash(floor(gl_FragCoord.xy / uPx) + fract(uTime)) - 0.5) * 0.022;
+  col += (hash(floor(gl_FragCoord.xy / uPx) + uGrain) - 0.5) * 0.022;
   gl_FragColor = vec4(col, 1.0);
 }
 `;
@@ -162,13 +165,74 @@ export interface SkyRenderer {
 }
 
 const MAX_DPR = 2; // full resolution: stars, moon and ridges stay sharp
-// Phones have dense screens and small GPUs: 1.5x is sharp there and saves battery.
-const MAX_DPR_TOUCH = 2;
+// Phones have dense screens and small GPUs: 1.75x stays sharp and saves battery.
+const MAX_DPR_TOUCH = 1.75;
 // Time wraps so shader coordinates stay small on low-precision phone GPUs.
 const TIME_WRAP_S = 600;
 const MOUSE_EASE = 0.06;
 const VEL_EASE = 0.08;
 const IDLE_MS = 600; // after this long without input the sky breathes at half rate
+
+const NOISE_SIZE = 256; // power of two: WebGL1 can repeat it
+const NOISE_BLUR = 3; // texels: turns white noise into soft value noise
+const NOISE_SPREAD = 0.2; // target deviation around 0.5, like classic value noise
+
+/** Seeded PRNG so the sky looks the same on every visit (mulberry32). */
+function random(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** Separable box blur on a wrapping square grid (keeps the texture tileable). */
+function blur(src: Float32Array, size: number, radius: number): Float32Array {
+  const pass = (from: Float32Array, horizontal: boolean): Float32Array => {
+    const out = new Float32Array(from.length);
+    const span = radius * 2 + 1;
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        let sum = 0;
+        for (let k = -radius; k <= radius; k++) {
+          const xx = horizontal ? (x + k + size) % size : x;
+          const yy = horizontal ? y : (y + k + size) % size;
+          sum += from[yy * size + xx];
+        }
+        out[y * size + x] = sum / span;
+      }
+    }
+    return out;
+  };
+  return pass(pass(src, true), false);
+}
+
+/** r: white noise; g: blurred noise stretched back to a full range. */
+function noisePixels(): Uint8Array {
+  const n = NOISE_SIZE * NOISE_SIZE;
+  const next = random(20260410);
+  const white = new Float32Array(n);
+  for (let i = 0; i < n; i++) white[i] = next();
+  const smooth = blur(blur(white, NOISE_SIZE, NOISE_BLUR), NOISE_SIZE, NOISE_BLUR);
+  let mean = 0;
+  for (let i = 0; i < n; i++) mean += smooth[i];
+  mean /= n;
+  let dev = 0;
+  for (let i = 0; i < n; i++) dev += (smooth[i] - mean) ** 2;
+  dev = Math.sqrt(dev / n) || 1;
+  const px = new Uint8Array(n * 4);
+  for (let i = 0; i < n; i++) {
+    const g = Math.min(1, Math.max(0, 0.5 + ((smooth[i] - mean) / dev) * NOISE_SPREAD));
+    px[i * 4] = Math.round(white[i] * 255);
+    px[i * 4 + 1] = Math.round(g * 255);
+    px[i * 4 + 2] = 0;
+    px[i * 4 + 3] = 255;
+  }
+  return px;
+}
 
 function compile(gl: WebGLRenderingContext, type: number, source: string): WebGLShader | null {
   const shader = gl.createShader(type);
@@ -230,6 +294,7 @@ export function createSky(canvas: HTMLCanvasElement, options: { reduce: boolean 
   let frame = 0;
   let running = false;
   const startTime = performance.now();
+  const touch = window.matchMedia('(pointer: coarse)').matches;
 
   if (!gl) return cssSky(canvas);
 
@@ -252,12 +317,22 @@ export function createSky(canvas: HTMLCanvasElement, options: { reduce: boolean 
   gl.enableVertexAttribArray(aPos);
   gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
+  const texture = gl.createTexture();
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, NOISE_SIZE, NOISE_SIZE, 0, gl.RGBA, gl.UNSIGNED_BYTE, noisePixels());
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+
   const u = (name: string) => gl.getUniformLocation(program, name);
   const loc = {
     res: u('uRes'), time: u('uTime'), top: u('uTop'), horizon: u('uHorizon'), glow: u('uGlow'),
     stars: u('uStars'), body: u('uBody'), isSun: u('uIsSun'), mouse: u('uMouse'), scroll: u('uScroll'),
-    vel: u('uVel'), pulse: u('uPulse'), px: u('uPx'),
+    vel: u('uVel'), pulse: u('uPulse'), px: u('uPx'), noise: u('uNoise'), grain: u('uGrain'),
   };
+  gl.uniform1i(loc.noise, 0);
 
   let scale = 1;
   const resize = (): void => {
@@ -300,6 +375,7 @@ export function createSky(canvas: HTMLCanvasElement, options: { reduce: boolean 
     gl.uniform1f(loc.vel, vel);
     gl.uniform1f(loc.pulse, pulse);
     gl.uniform1f(loc.px, scale);
+    gl.uniform2f(loc.grain, Math.floor(Math.random() * NOISE_SIZE), Math.floor(Math.random() * NOISE_SIZE));
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   };
 
@@ -307,7 +383,7 @@ export function createSky(canvas: HTMLCanvasElement, options: { reduce: boolean 
     frame = requestAnimationFrame(loop);
     // Idle: clouds move at 0.008/s, so skipping every other frame is invisible.
     const idle = performance.now() - lastInput > IDLE_MS && vel < 0.01 && pulse === 0;
-    if (idle && tick++ % 2) return;
+    if ((idle || touch) && tick++ % 2) return; // phones: 30fps is plenty for slow clouds
     draw();
   };
   const wake = (): void => {
