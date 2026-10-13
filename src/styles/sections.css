@@ -369,6 +369,11 @@ html.intro .fan__card {
 .patch.is-sewn::before {
   clip-path: inset(0 0 0 0);
 }
+/* concentric corners: quilt radius minus the stitch inset */
+.patch.is-tl::before { border-top-left-radius: calc(var(--radius-xl) - 9px); }
+.patch.is-tr::before { border-top-right-radius: calc(var(--radius-xl) - 9px); }
+.patch.is-bl::before { border-bottom-left-radius: calc(var(--radius-xl) - 9px); }
+.patch.is-br::before { border-bottom-right-radius: calc(var(--radius-xl) - 9px); }
 @media (hover: hover) and (pointer: fine) {
   .patch:hover::before {
     opacity: 0.7;

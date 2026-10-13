@@ -26,9 +26,11 @@ const CLOTH = [
   { area: 'g', tone: 'paper', order: 10 },
   { area: 'h', tone: 'pomegranate', role: 'wide', order: 11 },
 ] as const;
+// Patches in the quilt's corners (desktop grid): their stitch rounds with it.
+const CORNER: Partial<Record<string, string>> = { a: 'is-tl', b: 'is-tr', h: 'is-bl' };
 const roleClass = (i: number): string => {
   const cloth = CLOTH[i];
-  return 'role' in cloth ? `patch--${cloth.role}` : '';
+  return ['role' in cloth ? `patch--${cloth.role}` : '', CORNER[cloth.area] ?? ''].join(' ');
 };
 ---
 <section id="comfort" class="comfort" aria-labelledby="comfort-title">
@@ -46,7 +48,7 @@ const roleClass = (i: number): string => {
     <figure class="patch patch--photo" style="grid-area:p;--o:2" data-patch>
       <Image src={bed} alt={lang === 'ru' ? 'Спальня со свежим бельём' : 'Таза төсек-орыны бар жатын бөлме'} widths={[480, 800]} sizes="34vw" />
     </figure>
-    <figure class="patch patch--photo" style="grid-area:s;--o:8" data-patch>
+    <figure class="patch patch--photo is-br" style="grid-area:s;--o:8" data-patch>
       <Image src={studio} alt={lang === 'ru' ? 'Светлая комната с диваном' : 'Диваны бар жарық бөлме'} widths={[480, 800]} sizes="40vw" />
     </figure>
     <figure class="patch patch--pomegranate patch--quote" style="grid-area:q;--o:5" data-patch>
