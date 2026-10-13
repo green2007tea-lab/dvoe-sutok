@@ -160,6 +160,8 @@ export interface SkyRenderer {
 }
 
 const MAX_DPR = 2; // full resolution: stars, moon and ridges stay sharp
+// Phones have dense screens and small GPUs: 1.5x is sharp there and saves battery.
+const MAX_DPR_TOUCH = 1.5;
 const MOUSE_EASE = 0.06;
 const VEL_EASE = 0.08;
 const IDLE_MS = 600; // after this long without input the sky breathes at half rate
@@ -255,7 +257,8 @@ export function createSky(canvas: HTMLCanvasElement, options: { reduce: boolean 
 
   let scale = 1;
   const resize = (): void => {
-    scale = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+    const cap = window.matchMedia('(pointer: coarse)').matches ? MAX_DPR_TOUCH : MAX_DPR;
+    scale = Math.min(window.devicePixelRatio || 1, cap);
     canvas.width = Math.round(window.innerWidth * scale);
     canvas.height = Math.round(window.innerHeight * scale);
     gl.viewport(0, 0, canvas.width, canvas.height);

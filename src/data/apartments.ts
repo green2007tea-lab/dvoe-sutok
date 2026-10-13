@@ -1,6 +1,7 @@
 // Apartments from the company's own listings on Krisha.kz (see facts.md).
 // House numbers are left out on purpose: the exact address goes out after booking.
-// Photos come from 2GIS; which apartment each photo shows is not confirmed yet.
+// Photos: free CC0 demo shots (stocksnap.io) until the owner sends real ones;
+// the bureau's own photos stay in source/2gis.
 import type { ImageMetadata } from 'astro';
 import { todo, type Maybe } from './site';
 import a1Living from '../assets/photos/a1-living.jpg';
@@ -46,10 +47,10 @@ export const APARTMENTS: readonly Apartment[] = [
     guests: '2',
     price: 20000,
     photos: [
-      { src: a2Living, alt: { ru: 'Комната с телевизором и кондиционером', kz: 'Теледидары мен кондиционері бар бөлме' } },
-      { src: a2Bed, alt: { ru: 'Двуспальная кровать', kz: 'Екі кісілік төсек' } },
-      { src: a2Kitchen, alt: { ru: 'Кухня с плитой и столом у окна', kz: 'Плитасы мен терезе жанында үстелі бар ас үй' } },
-      { src: a2Bath, alt: { ru: 'Ванная комната', kz: 'Жуынатын бөлме' } },
+      { src: a2Living, alt: { ru: 'Комната с телевизором и рабочим столом', kz: 'Теледидары мен жұмыс үстелі бар бөлме' } },
+      { src: a2Bed, alt: { ru: 'Спальня с большой кроватью и тёплым светом', kz: 'Үлкен төсегі мен жылы жарығы бар жатын бөлме' } },
+      { src: a2Kitchen, alt: { ru: 'Кухня: стол у окна, плита и чайник', kz: 'Ас үй: терезе жанындағы үстел, плита және шәйнек' } },
+      { src: a2Bath, alt: { ru: 'Ванная с душевой', kz: 'Душы бар жуынатын бөлме' } },
     ],
   },
   {
@@ -61,9 +62,9 @@ export const APARTMENTS: readonly Apartment[] = [
     guests: '4',
     price: 20000,
     photos: [
-      { src: a1Living, alt: { ru: 'Гостиная с бирюзовым диваном и большим окном', kz: 'Көгілдір диваны мен үлкен терезесі бар қонақ бөлме' } },
-      { src: a1Studio, alt: { ru: 'Комната: диван, комод и двуспальная кровать', kz: 'Бөлме: диван, комод және екі кісілік төсек' } },
-      { src: a1Bed, alt: { ru: 'Кровать со свежим бельём', kz: 'Таза төсек-орын салынған төсек' } },
+      { src: a1Living, alt: { ru: 'Гостиная с зелёным диваном и выходом на балкон', kz: 'Жасыл диваны мен балконы бар қонақ бөлме' } },
+      { src: a1Studio, alt: { ru: 'Светлая комната с синим диваном', kz: 'Көк диваны бар жарық бөлме' } },
+      { src: a1Bed, alt: { ru: 'Спальня с белым изголовьем и шкафом', kz: 'Ақ бас тұсы мен шкафы бар жатын бөлме' } },
     ],
   },
   {
@@ -79,7 +80,7 @@ export const APARTMENTS: readonly Apartment[] = [
       kz: todo('Қазір жалға беріле ме'),
     },
     photos: [
-      { src: a3Bedroom, alt: { ru: 'Просторная спальня с большим окном', kz: 'Үлкен терезесі бар кең жатын бөлме' } },
+      { src: a3Bedroom, alt: { ru: 'Светлая спальня с большими окнами', kz: 'Үлкен терезелері бар жарық жатын бөлме' } },
     ],
   },
 ];

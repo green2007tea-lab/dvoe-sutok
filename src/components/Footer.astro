@@ -1,9 +1,10 @@
 ---
-// The day has come full circle: the clock is back at the visitor's own time.
-// Mobile keeps a bottom bar with the one button; desktop hides it.
+// The day has come full circle. Phones keep a bottom bar in thumb reach:
+// WhatsApp and a round call button. Desktop hides it.
 import WaLink from './WaLink.astro';
+import Icon from './Icon.astro';
 import { getDict } from '../i18n';
-import { PHONE } from '../data/site';
+import { DEMO, PHONE } from '../data/site';
 import type { Lang } from '../data/apartments';
 
 interface Props {
@@ -20,10 +21,13 @@ const year = new Date().getFullYear();
     <p>{t.footer.tagline}</p>
     <a href={PHONE.tel}>{PHONE.display}</a>
     <p class="footer__copy">© {year} «Двое суток»</p>
+    {DEMO && <p>{t.apartments.demoPhotos}: stocksnap.io, CC0</p>}
   </div>
 </footer>
 
 <div class="bottom-bar">
   <WaLink lang={lang} block />
-  <a class="bottom-bar__call" href={PHONE.tel}>{t.cta.callShort}</a>
+  <a class="bottom-bar__call" href={PHONE.tel} aria-label={`${t.cta.callShort} ${PHONE.display}`}>
+    <Icon name="phone" size={24} />
+  </a>
 </div>

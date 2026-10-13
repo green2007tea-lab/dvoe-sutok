@@ -2,6 +2,7 @@
 // Native <details>: works without JS; height opens smoothly via CSS where supported.
 import Text from './Text.astro';
 import { getDict } from '../i18n';
+import { DEMO } from '../data/site';
 import type { Lang } from '../data/apartments';
 
 interface Props {
@@ -9,8 +10,10 @@ interface Props {
 }
 
 const t = getDict(Astro.props.lang).faq;
-const half = Math.ceil(t.items.length / 2);
-const columns = [t.items.slice(0, half), t.items.slice(half)];
+// The demo shows only answers backed by facts.md.
+const items = t.items.filter((item) => !(DEMO && 'guess' in item && item.guess));
+const half = Math.ceil(items.length / 2);
+const columns = [items.slice(0, half), items.slice(half)];
 ---
 <section id="faq" class="faq" aria-labelledby="faq-title">
   <header class="section-head section-head--sky">

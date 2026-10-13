@@ -7,7 +7,7 @@ import { SplitText } from 'gsap/SplitText';
 import Lenis from 'lenis';
 import { initNowClock } from './nowclock';
 import { createSky, cssSky, type SkyRenderer } from './sky';
-import { almatyHourNow, formatClock, phaseOf, skyAt, wrapHour } from './daycycle';
+import { almatyHourNow, phaseOf, skyAt, wrapHour } from './daycycle';
 import {
   countUp,
   initFan,
@@ -27,21 +27,21 @@ const EVENING_HOUR = 19.7;
 const MORNING_HOUR = 9.5;
 const DESKTOP = '(min-width: 1000px)';
 const REAL_CLOCK_MS = 10_000;
+const PORTRAIT_RATIO = 0.8; // narrower than this is a phone held upright
 const HEADER_SOLID_AT = 60;
 const VELOCITY_FULL = 60; // Lenis px/frame that counts as a full time-lapse
 
 /* ---------- the day ---------- */
 
-const day = { start: almatyHourNow(), progress: 0, preview: 0, target: EVENING_HOUR };
+// The page always opens at night (moon high, stars out); scrolling then runs
+// the day from there. Not the real hour: a daytime start looked flat.
+const START_HOUR = 23.6;
+const day = { start: START_HOUR, progress: 0, preview: 0, target: EVENING_HOUR };
 let previewOn = false;
 let sky: SkyRenderer | null = null;
 let lastDark: boolean | null = null;
 let lastGreeting = '';
-let lastTime = '';
 
-const clock = document.querySelector<HTMLElement>('[data-clock]');
-const clockTimes = document.querySelectorAll<HTMLElement>('[data-clock-time]');
-const clockPhase = document.querySelector<HTMLElement>('[data-clock-phase]');
 const sunHit = document.querySelector<HTMLButtonElement>('[data-sun]');
 const greeting = document.querySelector<HTMLElement>('[data-greeting]');
 
@@ -63,17 +63,21 @@ function renderGreeting(hour: number): void {
   greeting.textContent = text;
 }
 
+/**
+ * On a tall phone screen the arc of the sky would put the sun or moon right
+ * behind the headings; there it runs in the upper right of the sky instead.
+ */
+function fitBody(body: readonly [number, number]): [number, number] {
+  if (window.innerWidth / window.innerHeight >= PORTRAIT_RATIO) return [body[0], body[1]];
+  return [0.58 + body[0] * 0.36, 0.6 + (body[1] - 0.34) * 0.52];
+}
+
 function renderDay(): void {
   const hour = currentHour();
-  const state = skyAt(hour);
+  const raw = skyAt(hour);
+  const state = { ...raw, body: fitBody(raw.body) };
   sky?.setSky(state);
   sky?.setScroll(day.progress);
-  const time = formatClock(hour);
-  if (time !== lastTime) {
-    lastTime = time;
-    clockTimes.forEach((el) => (el.textContent = time));
-  }
-  if (clockPhase && clock) clockPhase.textContent = clock.dataset[state.phase] ?? '';
   if (state.isDark !== lastDark) {
     document.documentElement.dataset.sky = state.isDark ? 'dark' : 'light';
     lastDark = state.isDark;
@@ -240,6 +244,8 @@ function sectionReveals(): void {
     });
   });
   gsap.utils.toArray<HTMLElement>('[data-count-decimal]').forEach((el) => {
+    // Start from zero right away, so the final value never shows before the count.
+    el.textContent = (0).toFixed(1).replace('.', ',');
     ScrollTrigger.create({ trigger: el, start: 'top 85%', once: true, onEnter: () => void countUp(el) });
   });
 }
@@ -378,6 +384,22 @@ function marquee(): void {
   });
 }
 
+/**
+ * Phones: the bottom bar slides in once the hero's button has scrolled away,
+ * and steps aside again where the contacts show their own big button.
+ */
+function bottomBar(): void {
+  const bar = document.querySelector<HTMLElement>('.bottom-bar');
+  const own = document.querySelectorAll<HTMLElement>('.hero__actions, .contacts__actions');
+  if (!bar || !own.length) return;
+  const visible = new Set<Element>();
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => (entry.isIntersecting ? visible.add(entry.target) : visible.delete(entry.target)));
+    bar.classList.toggle('is-shown', visible.size === 0);
+  });
+  own.forEach((el) => observer.observe(el));
+}
+
 function header(): void {
   const el = document.querySelector<HTMLElement>('[data-header]');
   if (!el) return;
@@ -388,14 +410,6 @@ function header(): void {
     onUpdate: (self) => solid(self.scroll()),
     onRefresh: (self) => solid(self.scroll()),
   });
-  // Near the contacts the real clock speaks; the sky clock steps aside.
-  ScrollTrigger.create({
-    trigger: '#contacts',
-    start: 'top 70%',
-    endTrigger: '.footer',
-    end: 'bottom top',
-    toggleClass: { targets: el, className: 'is-quiet' },
-  });
 }
 
 /* ---------- boot ---------- */
@@ -405,6 +419,7 @@ function boot(): void {
   initKeyTurn(reduce);
   initStages();
   initReviews(reduce);
+  bottomBar();
 
   if (reduce) {
     header();

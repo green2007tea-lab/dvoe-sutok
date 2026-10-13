@@ -364,13 +364,6 @@ html[data-sky='dark'] .header.is-scrolled {
   background: rgb(8 30 36 / 0.62);
   color: var(--paper);
 }
-.clock {
-  transition: opacity 400ms var(--ease-out);
-}
-.header.is-quiet .clock {
-  /* the contacts panel shows the real time; the sky clock steps aside */
-  opacity: 0;
-}
 .header__logo {
   display: block;
   line-height: 0;
@@ -401,21 +394,6 @@ html[data-sky='dark'] .header.is-scrolled {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-.clock {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 0 8px;
-  font-size: 14px;
-}
-.clock__time {
-  font: 600 20px/1 var(--font-display);
-  font-variant-numeric: tabular-nums;
-  min-width: 4.6ch;
-}
-.clock__phase {
-  opacity: 0.75;
 }
 .header__lang {
   display: grid;

@@ -1,8 +1,15 @@
 // Business facts. Verified ones come from the 2GIS card (2026-10-08);
 // everything wrapped in todo() still has to be confirmed by the owner.
 
-/** Show yellow [УТОЧНИТЬ У ВЛАДЕЛЬЦА] marks on the page. Turn off before the demo. */
-export const SHOW_TODO_MARKS = true;
+/**
+ * Demo for the owner: no yellow [УТОЧНИТЬ У ВЛАДЕЛЬЦА] marks, and answers that
+ * are only our guesses (FaqItem.guess) are left out instead of shown as fact.
+ * Set to false to see every open question marked on the page.
+ */
+export const DEMO = true;
+
+/** Show yellow [УТОЧНИТЬ У ВЛАДЕЛЬЦА] marks on the page. */
+export const SHOW_TODO_MARKS = !DEMO;
 
 export const TODO_LABEL = '[УТОЧНИТЬ У ВЛАДЕЛЬЦА]';
 

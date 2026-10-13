@@ -5,7 +5,7 @@ import { Image } from 'astro:assets';
 import WaLink from './WaLink.astro';
 import Text from './Text.astro';
 import { getDict, fmt, formatPrice } from '../i18n';
-import { plain, todo } from '../data/site';
+import { plain, todo, DEMO, SHOW_TODO_MARKS } from '../data/site';
 import { APARTMENTS, PHOTOS_MATCH_CONFIRMED, type Apartment, type Lang } from '../data/apartments';
 
 interface Props {
@@ -62,7 +62,7 @@ const facts = (apt: Apartment) => [
           </div>
 
           <div class="apt__info">
-            {apt.availability && (
+            {apt.availability && SHOW_TODO_MARKS && (
               <p class="apt__note"><Text value={apt.availability[lang]} /></p>
             )}
             <h3 id={`apt-${apt.id}`} class="apt__street">{apt.street[lang]}</h3>
@@ -80,7 +80,9 @@ const facts = (apt: Apartment) => [
             </dl>
             <p class="apt__price">{fmt(a.price, { price: formatPrice(apt.price) })}</p>
             <WaLink lang={lang} apartment={waLabel(apt)} />
-            {!PHOTOS_MATCH_CONFIRMED && (
+            {DEMO ? (
+              <p class="apt__note apt__note--quiet">{a.demoPhotos}</p>
+            ) : !PHOTOS_MATCH_CONFIRMED && (
               <p class="apt__note apt__note--quiet"><Text value={todo(a.photoMatch)} /></p>
             )}
           </div>

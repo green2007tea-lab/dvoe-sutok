@@ -22,9 +22,9 @@ const g = t.greeting;
 const ratingValue = RATING.value.toFixed(1).replace('.', ',');
 const [priceBefore, priceAfter] = t.hero.price.split('{price}');
 const photos = [
-  { src: bedroom, alt: lang === 'ru' ? 'Светлая спальня' : 'Жарық жатын бөлме', depth: 0.6 },
-  { src: kitchen, alt: lang === 'ru' ? 'Кухня у окна' : 'Терезе жанындағы ас үй', depth: 1 },
-  { src: living, alt: lang === 'ru' ? 'Гостиная с бирюзовым диваном' : 'Көгілдір диваны бар қонақ бөлме', depth: 1.5 },
+  { src: bedroom, alt: lang === 'ru' ? 'Светлая спальня с большими окнами' : 'Үлкен терезелері бар жарық жатын бөлме', depth: 0.6 },
+  { src: kitchen, alt: lang === 'ru' ? 'Кухня: стол у окна' : 'Ас үй: терезе жанындағы үстел', depth: 1 },
+  { src: living, alt: lang === 'ru' ? 'Гостиная с зелёным диваном' : 'Жасыл диваны бар қонақ бөлме', depth: 1.5 },
 ];
 ---
 <section class="hero" aria-labelledby="hero-title">
