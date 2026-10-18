@@ -6,7 +6,7 @@ import type { ImageMetadata } from 'astro';
 import { todo, type Maybe } from './site';
 import a1Living from '../assets/photos/a1-living.jpg';
 import a1Studio from '../assets/photos/a1-studio.jpg';
-import a1Bed from '../assets/photos/a1-bed.jpg';
+import a1Bed from '../assets/photos/a1-bed-hd.jpg';
 import a2Living from '../assets/photos/a2-living.jpg';
 import a2Bed from '../assets/photos/a2-bed.jpg';
 import a2Kitchen from '../assets/photos/a2-kitchen.jpg';
