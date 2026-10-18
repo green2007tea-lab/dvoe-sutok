@@ -3,10 +3,10 @@
 // thumbnails), the first few shown and the rest a tap away. Filtering and
 // «show all» reflow with GSAP Flip (catalog.ts). Works without JS: all shown.
 import { Image } from 'astro:assets';
-import print1 from '../assets/photos/a2-bed.jpg';
-import print2 from '../assets/photos/a1-studio.jpg';
-import print3 from '../assets/photos/a2-kitchen.jpg';
-import print4 from '../assets/photos/a3-bedroom.jpg';
+import print1 from '../assets/photos/a2-bed-hd.jpg';
+import print2 from '../assets/photos/a1-studio-hd.jpg';
+import print3 from '../assets/photos/a2-kitchen-hd.jpg';
+import print4 from '../assets/photos/a3-bedroom-hd.jpg';
 import WaLink from './WaLink.astro';
 import Text from './Text.astro';
 import { getDict, fmt, formatPrice } from '../i18n';
@@ -81,7 +81,7 @@ const note = (apt: Apartment): string | null => {
                   class:list={['apt-card__frame', { 'is-active': i === 0 }]}
                   src={photo.src}
                   alt={photo.alt[lang]}
-                  widths={[480, 720, 960]}
+                  widths={[480, 720, 960, 1440]}
                   sizes="(min-width: 1000px) 30vw, 90vw"
                   loading="lazy"
                   data-frame={i}
@@ -133,7 +133,7 @@ const note = (apt: Apartment): string | null => {
           <div class="more__prints" aria-hidden="true">
             {[print1, print2, print3, print4].map((src, i) => (
               <figure class="more__print" style={`--i:${i}`}>
-                <Image src={src} alt="" widths={[240, 360]} sizes="180px" loading="lazy" />
+                <Image src={src} alt="" widths={[240, 360, 540]} sizes="180px" loading="lazy" />
               </figure>
             ))}
           </div>

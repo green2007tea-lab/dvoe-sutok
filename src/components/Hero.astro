@@ -2,9 +2,9 @@
 // First viewport: the sky is the stage. Left: what, how much, one button.
 // Right: a fan of real photos that leans toward the cursor.
 import { Image } from 'astro:assets';
-import living from '../assets/photos/a1-living.jpg';
-import bedroom from '../assets/photos/a3-bedroom.jpg';
-import kitchen from '../assets/photos/a2-kitchen.jpg';
+import living from '../assets/photos/a1-living-hd.jpg';
+import bedroom from '../assets/photos/a3-bedroom-hd.jpg';
+import kitchen from '../assets/photos/a2-kitchen-hd.jpg';
 import WaLink from './WaLink.astro';
 import Icon from './Icon.astro';
 import { getDict, fmt, formatPrice } from '../i18n';
@@ -62,7 +62,7 @@ const photos = [
         <Image
           src={photo.src}
           alt={photo.alt}
-          widths={[420, 640, 900]}
+          widths={[420, 640, 900, 1300]}
           sizes="(min-width: 1200px) 30vw, 60vw"
           loading="eager"
           fetchpriority={i === 2 ? 'high' : 'auto'}

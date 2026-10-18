@@ -322,6 +322,21 @@ main,
   }
 }
 
+/* Text links keep their look, but a finger gets a 44 px tall target:
+   an invisible hit area centred on the link, no change to the layout. */
+:is(.hero__rating, .link-arrow, .contacts__phone, .contacts__links a, .footer__row a) {
+  position: relative;
+}
+:is(.hero__rating, .link-arrow, .contacts__phone, .contacts__links a, .footer__row a)::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 44px;
+  translate: 0 -50%;
+}
+
 /* ---------- header ---------- */
 
 .header {
