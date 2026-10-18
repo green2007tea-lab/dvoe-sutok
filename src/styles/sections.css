@@ -413,6 +413,34 @@ html.intro .fan__card {
   font-size: 16px;
 }
 
+/* the card closes the last row (catalog.ts sets data-span): wide, it lies on its side */
+.apt-card--more[data-span='2'] { grid-column: span 2; }
+.apt-card--more[data-span='3'] { grid-column: span 3; }
+.apt-card--more:is([data-span='2'], [data-span='3']) .apt-more {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: 1fr auto auto auto;
+  column-gap: 36px;
+  row-gap: 16px;
+  padding: 28px 32px 28px 24px;
+}
+.apt-card--more[data-span='3'] .apt-more {
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+}
+.apt-card--more:is([data-span='2'], [data-span='3']) .more__prints {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  align-self: center;
+  height: clamp(200px, 17vw, 250px);
+  margin: 0;
+}
+.apt-card--more:is([data-span='2'], [data-span='3']) :is(.apt__more-title, .apt__more-text, .btn) {
+  grid-column: 2;
+}
+.apt-card--more:is([data-span='2'], [data-span='3']) .apt__more-title { grid-row: 2; }
+.apt-card--more:is([data-span='2'], [data-span='3']) .apt__more-text { grid-row: 3; }
+.apt-card--more:is([data-span='2'], [data-span='3']) .btn { grid-row: 4; }
+
 /* a pile of other apartments' photos that fans out once the card is seen */
 .more__prints {
   position: relative;

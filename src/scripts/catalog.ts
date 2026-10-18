@@ -19,10 +19,24 @@ export function initCatalog(reduce: boolean): void {
   const chips = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-filter]'));
   const cards = Array.from(root.querySelectorAll<HTMLElement>('[data-card]'));
   const more = root.querySelector<HTMLButtonElement>('[data-catalog-more]');
+  const grid = root.querySelector<HTMLElement>('[data-catalog-grid]');
+  const moreCard = root.querySelector<HTMLElement>('.apt-card--more');
   const first = (): number => (window.matchMedia(PHONE).matches ? FIRST_PHONE : FIRST_DESKTOP);
 
   let filter = 'all';
   let expanded = false;
+
+  /**
+   * The «another apartment» card takes every free cell of the last row, so it
+   * is never left alone beside a gap. An attribute, not an inline style: Flip
+   * restores inline styles when it ends.
+   */
+  const fit = (): void => {
+    if (!grid || !moreCard) return;
+    const cols = getComputedStyle(grid).gridTemplateColumns.split(' ').length;
+    const shown = cards.filter((card) => !card.hasAttribute('data-keep') && !card.hidden).length;
+    moreCard.dataset.span = String(cols - (shown % cols));
+  };
 
   /** Show the cards of the current filter: the first few, or all once expanded. */
   const layout = (): void => {
@@ -37,6 +51,7 @@ export function initCatalog(reduce: boolean): void {
       more.hidden = matching.length <= limit;
       more.textContent = (more.dataset.label ?? '').replace('{n}', String(matching.length));
     }
+    fit();
   };
 
   /** Change the layout, animating the grid from where it was. */
@@ -73,6 +88,8 @@ export function initCatalog(reduce: boolean): void {
     });
   });
   more?.addEventListener('click', () => change(() => (expanded = true)));
+  // The grid has 3, 2 or 1 columns by width: the last row must be closed again.
+  window.addEventListener('resize', fit);
 
   layout();
 }
