@@ -34,6 +34,10 @@ const KEYS: readonly Key[] = [
 
 export const SUNRISE = 6;
 export const SUNSET = 20.5;
+// Switch text to light while the sky is still mid-blue: keeps contrast at dusk and dawn.
+const DAWN_LIGHT = 6.9;
+const DUSK_DARK = 18.4;
+const THEME_MARGIN = 0.15; // h: about 0.6% of the page either side of a switch
 
 const smooth = (t: number): number => t * t * (3 - 2 * t);
 const mix = (a: Rgb, b: Rgb, t: number): Rgb => [
@@ -58,10 +62,16 @@ export interface Sky {
   readonly isDark: boolean;
 }
 
-/** Position on the arc of the day: x left→right, y a soft arch. */
+/** Height of the arc ends: below the foothills, so the sun rises and the moon sets behind the Alatau. */
+export const ARC_LOW = -0.08;
+export const ARC_PEAK = 0.84;
+// Below 1 the body climbs clear of the ridges quickly, then lingers high.
+const ARC_SHAPE = 0.7;
+
+/** Position on the arc of the day: x left→right, y a soft arch from behind the mountains. */
 const arc = (t: number): readonly [number, number] => [
   0.08 + t * 0.84,
-  0.34 + Math.sin(t * Math.PI) * 0.5,
+  ARC_LOW + Math.sin(t * Math.PI) ** ARC_SHAPE * (ARC_PEAK - ARC_LOW),
 ];
 
 export function skyAt(rawHour: number): Sky {
@@ -84,9 +94,18 @@ export function skyAt(rawHour: number): Sky {
     body: arc(isSunUp ? dayT : nightT),
     isSun: isSunUp ? 1 : 0,
     phase: phaseOf(hour),
-    // Switch text to light while the sky is still mid-blue: keeps contrast at dusk and dawn.
-    isDark: hour < 6.9 || hour > 18.4,
+    isDark: hour < DAWN_LIGHT || hour > DUSK_DARK,
   };
+}
+
+/**
+ * Text theme with a margin around both switch points: a scroll that settles
+ * right at the threshold must not flicker the headings between dark and light.
+ */
+export function darkAfter(rawHour: number, wasDark: boolean | null): boolean {
+  const hour = wrapHour(rawHour);
+  const pad = wasDark === null ? 0 : wasDark ? -THEME_MARGIN : THEME_MARGIN;
+  return hour < DAWN_LIGHT + pad || hour > DUSK_DARK - pad;
 }
 
 export function phaseOf(hour: number): Phase {

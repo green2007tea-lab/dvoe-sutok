@@ -287,7 +287,7 @@ html.intro .fan__card {
   object-fit: cover;
   opacity: 0;
   scale: 1.05;
-  transition: opacity 350ms var(--ease-out), scale 700ms var(--ease-out);
+  transition: opacity 250ms var(--ease-out), scale 700ms var(--ease-out);
 }
 .apt-card__frame.is-active {
   opacity: 1;
@@ -455,7 +455,9 @@ html.intro .fan__card {
 .is-seen .more__print:nth-child(4) { --x: 112%; --y: 2%; --r: 10deg; }
 @media (hover: hover) and (pointer: fine) {
   .apt-more:hover .more__print {
+    /* a hover answers the hand: quick, unlike the slow first spread */
     transition-delay: 0ms;
+    transition-duration: 300ms;
     translate: var(--x) calc(var(--y) - 8%);
   }
 }

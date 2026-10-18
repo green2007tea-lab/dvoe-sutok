@@ -438,7 +438,8 @@
     z-index: 10;
     /* hidden while the hero's own button is on screen (motion.ts) */
     translate: 0 110%;
-    transition: translate 420ms var(--ease-out);
+    /* steps aside fast, so it never covers the WhatsApp button arriving on screen */
+    transition: translate 240ms var(--ease-out);
     display: flex;
     align-items: center;
     gap: 10px;
@@ -450,6 +451,7 @@
   }
   .bottom-bar.is-shown {
     translate: 0 0;
+    transition-duration: 420ms;
   }
   .bottom-bar .btn {
     flex: 1;

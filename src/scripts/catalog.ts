@@ -10,7 +10,8 @@ gsap.registerPlugin(Flip);
 const FIRST_DESKTOP = 5; // with the «another apartment» card: two full rows of three
 const FIRST_PHONE = 4;
 const PHONE = '(max-width: 999px)';
-const FLIP_S = 0.6;
+const FLIP_S = 0.5;
+const FLIP_EASE = 'power4.inOut'; // close to --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1)
 
 export function initCatalog(reduce: boolean): void {
   const root = document.querySelector<HTMLElement>('[data-catalog]');
@@ -51,7 +52,7 @@ export function initCatalog(reduce: boolean): void {
     layout();
     Flip.from(state, {
       duration: FLIP_S,
-      ease: 'power3.inOut',
+      ease: FLIP_EASE,
       absolute: true,
       nested: true,
       prune: true,

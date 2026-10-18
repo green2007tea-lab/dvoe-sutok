@@ -108,7 +108,10 @@ void main() {
   float d = distance(p, b);
   float radius = 0.052 * (1.0 + uPulse * 0.12);
   float disc = 1.0 - smoothstep(radius - aa, radius, d);
-  float halo = (exp(-d * 5.0) * 0.5 + exp(-d * 16.0) * 0.45) * (1.0 + uPulse * 0.9);
+  // Behind the ridges the light fades with the body: the moon sets, the sun
+  // rises, and the swap between them happens unseen.
+  float rise = smoothstep(-0.07, 0.2, uBody.y);
+  float halo = (exp(-d * 5.0) * 0.5 + exp(-d * 16.0) * 0.45) * (1.0 + uPulse * 0.9) * rise;
   col += uGlow * halo * mix(0.35, 0.95, uIsSun);
   vec3 sunCol = mix(uGlow, vec3(1.0, 0.98, 0.9), 0.55);
   col = mix(col, sunCol, disc * uIsSun);
@@ -133,7 +136,7 @@ void main() {
     // (only near the crest: lower down the faces melt into one haze)
     float slope = ridge(rx + 0.03) - ridge(rx - 0.03);
     float crest = smoothstep(far - 0.09, far - 0.01, uv.y);
-    float lit = mix(0.5, clamp(0.5 + slope * 5.0 * clamp((uBody.x * aspect - x) * 6.0, -1.0, 1.0), 0.0, 1.0), crest);
+    float lit = mix(0.5, clamp(0.5 + slope * 5.0 * clamp((uBody.x * aspect - x) * 6.0, -1.0, 1.0) * rise, 0.0, 1.0), crest);
     vec3 farCol = mix(mix(uHorizon, uTop, 0.5), uHorizon, 0.45) * mix(0.72, 0.92, lit);
     float snow = smoothstep(0.45, 0.68, rh) * smoothstep(far - 0.07, far - 0.012, uv.y);
     vec3 snowCol = mix(vec3(0.95, 0.97, 1.0), uGlow, 0.3) * mix(0.55, 1.0, uIsSun) * mix(0.8, 1.05, lit);

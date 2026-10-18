@@ -7,7 +7,7 @@ import { SplitText } from 'gsap/SplitText';
 import Lenis from 'lenis';
 import { initNowClock } from './nowclock';
 import { createSky, cssSky, type SkyRenderer } from './sky';
-import { almatyHourNow, phaseOf, skyAt } from './daycycle';
+import { ARC_LOW, ARC_PEAK, almatyHourNow, darkAfter, phaseOf, skyAt } from './daycycle';
 import { initCatalog } from './catalog';
 import {
   countUp,
@@ -27,6 +27,8 @@ const EXPO = 'expo.out';
 const DESKTOP = '(min-width: 1000px)';
 const REAL_CLOCK_MS = 10_000;
 const PORTRAIT_RATIO = 0.8; // narrower than this is a phone held upright
+const PHONE_ARC_PEAK = 0.9; // highest point of the sun or moon on a phone
+const PHONE_ARC_SHAPE = 0.8; // below 1: a touch higher than desktop, clear of the headings
 const HEADER_SOLID_AT = 60;
 const VELOCITY_FULL = 60; // Lenis px/frame that counts as a full time-lapse
 
@@ -62,13 +64,16 @@ function renderGreeting(): void {
  */
 function fitBody(body: readonly [number, number]): [number, number] {
   if (window.innerWidth / window.innerHeight >= PORTRAIT_RATIO) return [body[0], body[1]];
-  return [0.58 + body[0] * 0.36, 0.6 + (body[1] - 0.34) * 0.52];
+  // One smooth curve from behind the ridges up to the upper right: it lifts
+  // the body a little higher than on desktop, with no knee where it brakes.
+  const height = gsap.utils.clamp(0, 1, (body[1] - ARC_LOW) / (ARC_PEAK - ARC_LOW));
+  return [0.58 + body[0] * 0.36, ARC_LOW + height ** PHONE_ARC_SHAPE * (PHONE_ARC_PEAK - ARC_LOW)];
 }
 
 function renderDay(): void {
   const hour = currentHour();
   const raw = skyAt(hour);
-  const state = { ...raw, body: fitBody(raw.body) };
+  const state = { ...raw, body: fitBody(raw.body), isDark: darkAfter(hour, lastDark) };
   sky?.setSky(state);
   sky?.setScroll(day.progress);
   if (state.isDark !== lastDark) {
