@@ -50,7 +50,7 @@ html[lang='kk'] {
 }
 html[lang='kk'] :is(
   .hero__title, .hero__price-num, .section-title, .apt__street, .apt__fact dd,
-  .apt__more-title, .patch__title, .patch--quote blockquote p, .step__big,
+  .apt__more-title, .amenity__title, .amenities__quote p, .step__big,
   .step__title, .dates__title, .reviews__score-num, .contacts__title,
   .contacts__phone, .contacts__now-time, .marquee__list li, .footer__wrap
 ) {

@@ -10,8 +10,20 @@ import telegram from '@phosphor-icons/core/assets/regular/telegram-logo.svg?raw'
 import mapPin from '@phosphor-icons/core/assets/regular/map-pin.svg?raw';
 import chat from '@phosphor-icons/core/assets/fill/chat-circle-dots-fill.svg?raw';
 import images from '@phosphor-icons/core/assets/fill/images-fill.svg?raw';
+// «What's inside»: one regular-weight icon per amenity
+import broom from '@phosphor-icons/core/assets/regular/broom.svg?raw';
+import wifi from '@phosphor-icons/core/assets/regular/wifi-high.svg?raw';
+import pot from '@phosphor-icons/core/assets/regular/cooking-pot.svg?raw';
+import shower from '@phosphor-icons/core/assets/regular/shower.svg?raw';
+import moon from '@phosphor-icons/core/assets/regular/moon-stars.svg?raw';
+import handshake from '@phosphor-icons/core/assets/regular/handshake.svg?raw';
+import briefcase from '@phosphor-icons/core/assets/regular/briefcase.svg?raw';
+import qr from '@phosphor-icons/core/assets/regular/qr-code.svg?raw';
 
-const ICONS = { whatsapp, key, star, phone, arrowLeft, arrowRight, telegram, mapPin, chat, images } as const;
+const ICONS = {
+  whatsapp, key, star, phone, arrowLeft, arrowRight, telegram, mapPin, chat, images,
+  broom, wifi, pot, shower, moon, handshake, briefcase, qr,
+} as const;
 export type IconName = keyof typeof ICONS;
 
 interface Props {

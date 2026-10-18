@@ -1,9 +1,10 @@
 ---
-// "What's inside" as a көрпе: a patchwork quilt of facts, two photos and a
-// guest's own words. Patches are stitched in as they arrive (motion.ts).
+// "What's inside": one bedroom photo with a guest's own words beside a plain
+// list of what every apartment has, read top to bottom. It arrives in one
+// gentle sequence: the photo settles, the words rise, the list follows (motion.ts).
 import { Image } from 'astro:assets';
 import bed from '../assets/photos/a1-bed.jpg';
-import studio from '../assets/photos/a1-studio.jpg';
+import Icon, { type IconName } from './Icon.astro';
 import { getDict } from '../i18n';
 import type { Lang } from '../data/apartments';
 
@@ -13,47 +14,38 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = getDict(lang).comfort;
-// Grid area and cloth for each fact patch, in dictionary order. Four cloths
-// only, so the quilt reads as one piece of fabric, not a colour sampler.
-// `order` is the place on a phone, where text and photos take turns.
-const CLOTH = [
-  { area: 'a', tone: 'green', role: 'lead', order: 1 },
-  { area: 'b', tone: 'saffron', order: 3 },
-  { area: 'c', tone: 'paper', order: 4 },
-  { area: 'd', tone: 'paper', order: 6 },
-  { area: 'e', tone: 'saffron', order: 7 },
-  { area: 'f', tone: 'green', order: 9 },
-  { area: 'g', tone: 'paper', order: 10 },
-  { area: 'h', tone: 'pomegranate', role: 'wide', order: 11 },
-] as const;
-// Patches in the quilt's corners (desktop grid): their stitch rounds with it.
-const CORNER: Partial<Record<string, string>> = { a: 'is-tl', b: 'is-tr', h: 'is-bl' };
-const roleClass = (i: number): string => {
-  const cloth = CLOTH[i];
-  return ['role' in cloth ? `patch--${cloth.role}` : '', CORNER[cloth.area] ?? ''].join(' ');
-};
+// One icon per amenity, in dictionary order.
+const ICONS: readonly IconName[] = ['broom', 'wifi', 'pot', 'shower', 'moon', 'handshake', 'briefcase', 'qr'];
 ---
 <section id="comfort" class="comfort" aria-labelledby="comfort-title">
   <header class="section-head section-head--sky">
     <h2 id="comfort-title" class="section-title" data-split>{t.title}</h2>
   </header>
 
-  <div class="quilt" data-quilt>
-    {t.patches.map((patch, i) => (
-      <article class={`patch patch--${CLOTH[i].tone} ${roleClass(i)}`} style={`grid-area:${CLOTH[i].area};--o:${CLOTH[i].order}`} data-patch>
-        <h3 class="patch__title">{patch.t}</h3>
-        <p class="patch__text">{patch.d}</p>
-      </article>
-    ))}
-    <figure class="patch patch--photo" style="grid-area:p;--o:2" data-patch>
-      <Image src={bed} alt={lang === 'ru' ? 'Спальня со свежим бельём' : 'Таза төсек-орыны бар жатын бөлме'} widths={[480, 800]} sizes="34vw" />
+  <div class="amenities" data-amenities>
+    <figure class="amenities__photo">
+      {/* the full 960 px source: anything smaller is upscaled in the tall column */}
+      <Image
+        src={bed}
+        alt={lang === 'ru' ? 'Спальня со свежим бельём' : 'Таза төсек-орыны бар жатын бөлме'}
+        widths={[480, 960]}
+        sizes="(min-width: 1000px) 42vw, 100vw"
+        quality={90}
+        data-amenities-img
+      />
+      <figcaption class="amenities__quote" data-amenities-quote>
+        <blockquote lang="ru"><p>«{t.quote}»</p></blockquote>
+        <span>{t.quoteAuthor}</span>
+      </figcaption>
     </figure>
-    <figure class="patch patch--photo is-br" style="grid-area:s;--o:8" data-patch>
-      <Image src={studio} alt={lang === 'ru' ? 'Светлая комната с диваном' : 'Диваны бар жарық бөлме'} widths={[480, 800]} sizes="40vw" />
-    </figure>
-    <figure class="patch patch--pomegranate patch--quote" style="grid-area:q;--o:5" data-patch>
-      <blockquote lang="ru"><p>«{t.quote}»</p></blockquote>
-      <figcaption>{t.quoteAuthor}</figcaption>
-    </figure>
+    <ul class="amenities__list">
+      {t.patches.map((item, i) => (
+        <li class="amenity" data-amenity>
+          <span class="amenity__icon"><Icon name={ICONS[i] ?? 'broom'} size={26} /></span>
+          <h3 class="amenity__title">{item.t}</h3>
+          <p class="amenity__text">{item.d}</p>
+        </li>
+      ))}
+    </ul>
   </div>
 </section>

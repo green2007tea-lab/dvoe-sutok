@@ -236,27 +236,26 @@ function catalogReveal(): void {
   });
 }
 
-/** The quilt: patches arrive and settle, then their stitches are sewn. */
-function quilt(): void {
-  const patches = gsap.utils.toArray<HTMLElement>('[data-patch]');
-  gsap.set(patches, { opacity: 0, y: 48, rotation: () => gsap.utils.random(-3, 3) });
-  // Start before the row reaches the screen, so the cloth is already sewn
-  // by the time the visitor looks at it: no holes in the quilt.
-  ScrollTrigger.batch(patches, {
-    start: 'top bottom+=160',
-    once: true,
-    onEnter: (batch) => {
-      gsap.to(batch, {
-        opacity: 1,
-        y: 0,
-        rotation: 0,
-        duration: 0.85,
-        ease: EXPO,
-        stagger: 0.05,
-        onComplete: () => batch.forEach((el) => el.classList.add('is-sewn')),
-      });
-    },
-  });
+/**
+ * What's inside: the photo is uncovered from below and settles from a slight
+ * zoom, the guest's words rise onto it, and the list follows top to bottom,
+ * each icon turning into place. Plays once.
+ */
+function amenities(): void {
+  const root = document.querySelector<HTMLElement>('[data-amenities]');
+  if (!root) return;
+  const photo = root.querySelector<HTMLElement>('.amenities__photo');
+  const img = root.querySelector<HTMLElement>('[data-amenities-img]');
+  const quote = root.querySelector<HTMLElement>('[data-amenities-quote]');
+  const items = gsap.utils.toArray<HTMLElement>('[data-amenity]', root);
+  const icons = items.map((item) => item.querySelector<HTMLElement>('.amenity__icon')).filter((el) => el !== null);
+
+  const tl = gsap.timeline({ scrollTrigger: { trigger: root, start: 'top 78%', once: true } });
+  if (photo) tl.fromTo(photo, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.1, ease: EXPO }, 0);
+  if (img) tl.from(img, { scale: 1.14, duration: 1.6, ease: EXPO }, 0);
+  if (quote) tl.from(quote, { y: 40, opacity: 0, duration: 0.9, ease: EXPO }, 0.45);
+  tl.from(items, { y: 24, opacity: 0, duration: 0.8, ease: EXPO, stagger: 0.07 }, 0.2);
+  tl.from(icons, { scale: 0.6, rotation: -25, duration: 0.6, ease: 'back.out(1.8)', stagger: 0.07 }, 0.28);
 }
 
 /**
@@ -377,7 +376,6 @@ function boot(): void {
     header();
     document.documentElement.classList.remove('intro');
     document.querySelectorAll('[data-step]').forEach((step) => step.classList.add('is-lit'));
-    document.querySelectorAll('[data-patch]').forEach((patch) => patch.classList.add('is-sewn'));
     placeStations();
     ScrollTrigger.addEventListener('refresh', () => void placeStations());
     document.fonts?.ready.then(() => ScrollTrigger.refresh());
@@ -393,7 +391,7 @@ function boot(): void {
   heroIntro();
   sectionReveals();
   catalogReveal();
-  quilt();
+  amenities();
   stepsArc();
   marquee();
   if (finePointer) {

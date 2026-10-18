@@ -163,76 +163,45 @@
     width: 100%;
   }
 
-  /* the quilt: two columns, photos and the guest's words full width */
+  /* comfort: the photo with the guest's words on top, the list below */
   .comfort {
     padding-top: 96px;
   }
-  .quilt {
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas: none;
-    grid-auto-rows: auto;
+  .amenities {
+    grid-template-columns: minmax(0, 1fr);
     margin: 0 12px;
     border-radius: 28px;
   }
-  .quilt > * {
-    grid-row: auto !important;
-    grid-column: auto !important;
-    order: var(--o, 0);
+  .amenities__photo {
+    /* square: less scrolling, and the 960 px source is stretched less */
+    aspect-ratio: 1;
   }
-  .patch {
-    padding: 22px 18px;
-    min-height: 168px;
+  .amenities__quote {
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    padding: 18px 20px;
   }
-  .patch::before {
-    inset: 7px;
+  .amenities__quote p {
+    font-size: 20px;
   }
-  /* the desktop corner patches are elsewhere on a phone */
-  .quilt .patch[class*='is-']::before {
-    border-radius: 6px;
+  .amenities__list {
+    padding: 8px 18px;
   }
-  /* phone corners: the lead patch on top, the wide one at the bottom */
-  .quilt .patch.patch--lead::before {
-    border-top-left-radius: 21px;
-    border-top-right-radius: 21px;
+  .amenity {
+    grid-template-columns: 44px minmax(0, 1fr);
+    column-gap: 14px;
+    padding: 14px 0;
   }
-  .quilt .patch.patch--wide::before {
-    border-bottom-left-radius: 21px;
-    border-bottom-right-radius: 21px;
+  .amenity__icon {
+    width: 44px;
+    height: 44px;
   }
-  .patch__title {
-    /* «командировок» fits a half-width patch whole, without a hyphen */
-    font-size: clamp(14px, 3.9vw, 17px);
+  .amenity__title {
+    font-size: 17px;
   }
-  .patch__text {
+  .amenity__text {
     font-size: 15px;
-  }
-  .quilt > .patch--lead,
-  .quilt > .patch--wide,
-  .quilt > .patch--quote,
-  .quilt > .patch--photo {
-    grid-column: 1 / -1 !important; /* beats the desktop grid-area set inline */
-  }
-  .patch--lead .patch__title {
-    font-size: 28px;
-  }
-  .patch--lead .patch__text {
-    font-size: 16px;
-  }
-  .patch--wide {
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-end;
-    gap: 10px;
-  }
-  .patch--wide .patch__title {
-    font-size: 24px;
-  }
-  .patch--photo {
-    min-height: 0;
-    aspect-ratio: 4 / 3;
-  }
-  .patch--quote blockquote p {
-    font-size: 22px;
   }
 
   /* how: the arc becomes a timeline down the left edge */
@@ -532,8 +501,5 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-property: opacity, color, background-color !important;
-  }
-  .patch::before {
-    clip-path: none;
   }
 }
