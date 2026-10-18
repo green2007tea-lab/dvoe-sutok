@@ -184,145 +184,241 @@ html.intro .fan__card {
 .apts {
   padding-top: 120px;
 }
-.apts__pin {
-  height: 100vh;
-  display: flex;
-  align-items: flex-end;
-  padding-bottom: 7vh;
-  overflow: hidden;
-}
-.apts__track {
-  display: flex;
-  gap: 36px;
-  /* the pan ends with the last card in the middle of the screen */
-  padding: 0 calc(50vw - min(360px, 28vw)) 0 var(--gutter);
-  will-change: transform;
-}
-.apt {
-  flex: none;
+
+/* ---------- the catalogue: chips, a grid of cards, «show all» ---------- */
+
+.catalog {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  width: min(1180px, 80vw);
-  height: min(66vh, 600px);
-  border-radius: var(--radius-xl);
-  background: var(--paper);
-  box-shadow: var(--shadow-lift);
-  overflow: hidden;
+  gap: 28px;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
 }
-.apt__stage {
-  position: relative;
+.catalog__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 10px 0 20px;
+  border: 1px solid color-mix(in srgb, var(--sky-ink) 26%, transparent);
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--sky-ink) 6%, transparent);
+  color: var(--sky-ink);
+  font: 600 16px/1 var(--font-text);
+  cursor: pointer;
+  transition: background-color 200ms var(--ease-out), color 200ms var(--ease-out), border-color 200ms var(--ease-out), scale 140ms var(--ease-out);
+}
+.chip__count {
+  display: grid;
+  place-items: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--sky-ink) 14%, transparent);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.chip:active {
+  scale: 0.96;
+}
+.chip[aria-pressed='true'] {
+  border-color: var(--saffron);
+  background: var(--saffron);
+  color: var(--ink);
+}
+.chip[aria-pressed='true'] .chip__count {
+  background: rgb(16 37 31 / 0.14);
+}
+@media (hover: hover) and (pointer: fine) {
+  .chip[aria-pressed='false']:hover {
+    background: color-mix(in srgb, var(--sky-ink) 14%, transparent);
+  }
+}
+
+.catalog__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.apt-card {
+  display: flex;
+  min-width: 0;
+}
+.apt-card[hidden] {
+  display: none;
+}
+.apt-card__inner {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border-radius: var(--radius-l);
+  background: var(--paper);
+  box-shadow: var(--shadow-soft);
   overflow: hidden;
-  clip-path: inset(0); /* the parallax strip must not bleed into the info column */
+  transition: translate 300ms var(--ease-out), box-shadow 300ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .apt-card__inner:hover {
+    translate: 0 -6px;
+    box-shadow: var(--shadow-lift);
+  }
+}
+
+.apt-card__stage {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
   background: var(--paper-2);
 }
-.apt__frames {
-  position: absolute;
-  inset: 0 -8%;
-}
-.apt__frame {
+.apt-card__frame {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  scale: 1.06;
+  scale: 1.05;
   transition: opacity 350ms var(--ease-out), scale 700ms var(--ease-out);
 }
-.apt__frame.is-active {
+.apt-card__frame.is-active {
   opacity: 1;
   scale: 1;
 }
-.apt__thumbs {
-  position: absolute;
-  left: 24px;
-  bottom: 24px;
-  display: flex;
-  gap: 10px;
+@media (hover: hover) and (pointer: fine) {
+  .apt-card__inner:hover .apt-card__frame.is-active {
+    scale: 1.04;
+  }
 }
-.apt__thumb {
-  width: 64px;
-  height: 64px;
+.apt-card__price {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  padding: 8px 14px;
+  border-radius: 99px;
+  background: rgb(244 248 246 / 0.94);
+  color: var(--ink);
+  font: 700 15px/1 var(--font-text);
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 4px 14px -6px rgb(16 37 31 / 0.4);
+}
+.apt-card__thumbs {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  display: flex;
+  gap: 6px;
+}
+.apt-card__thumb {
+  width: 44px;
+  height: 44px;
   padding: 0;
-  border: 2px solid transparent;
-  border-radius: 16px;
+  border: 2px solid rgb(255 255 255 / 0.5);
+  border-radius: 12px;
   overflow: hidden;
-  cursor: pointer;
   background: var(--paper);
+  cursor: pointer;
   box-shadow: var(--shadow-soft);
   transition: border-color 200ms var(--ease-out), translate 200ms var(--ease-out);
 }
-.apt__thumb img {
+.apt-card__thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-.apt__thumb.is-active {
-  border-color: var(--paper);
-  translate: 0 -4px;
+.apt-card__thumb.is-active {
+  border-color: #fff;
+  translate: 0 -3px;
 }
-.apt__info {
+
+.apt-card__body {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 52px 52px 44px;
+  gap: 14px;
+  padding: 20px 20px 18px;
 }
-.apt__street {
-  font: 700 clamp(30px, 2.8vw, 46px)/1.05 var(--font-display);
+.apt-card__street {
+  font: 700 24px/1.1 var(--font-display);
   letter-spacing: -0.02em;
+  text-wrap: balance;
 }
-.apt__facts {
+.apt-card__facts {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 22px 28px;
-  padding: 26px 0;
+  grid-template-columns: repeat(4, auto);
+  justify-content: space-between;
+  gap: 4px 10px;
+  margin: 0 0 auto; /* the button drops to the card's foot */
+  padding: 14px 0;
   border-block: 1px solid var(--line);
 }
-.apt__fact dt {
-  font-size: 14px;
+.apt-card__fact dt {
+  font-size: 12px;
   color: var(--ink-soft);
 }
-.apt__fact dd {
+.apt-card__fact dd {
   display: flex;
   align-items: baseline;
-  gap: 6px;
-  font: 600 34px/1.1 var(--font-display);
+  gap: 4px;
+  margin: 0;
+  font: 600 20px/1.1 var(--font-display);
   font-variant-numeric: tabular-nums;
 }
-.apt__unit {
-  font: 600 16px/1 var(--font-text);
+.apt-card__unit {
+  font: 600 12px/1 var(--font-text);
   color: var(--ink-soft);
 }
-.apt__price {
-  font-size: 20px;
-  font-weight: 700;
+.apt-card__body .btn {
+  height: 54px;
+  font-size: 16px;
 }
-.apt__note {
-  font-size: 14px;
-}
-.apt__note--quiet {
+.apt-card__note {
+  font-size: 13px;
   color: var(--ink-soft);
 }
 
-.apt--more {
+/* the last card: «need another apartment?» with a pile of photos */
+.apt-card--more .apt-more {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  align-items: flex-start;
-  gap: 24px;
-  width: min(720px, 56vw);
-  padding: 44px 64px 56px;
+  gap: 16px;
+  width: 100%;
+  min-height: 100%;
+  padding: 24px 22px 22px;
+  border-radius: var(--radius-l);
   background: var(--green-cloth);
   color: var(--paper);
+  box-shadow: var(--shadow-soft);
+}
+.apt__more-title {
+  font: 700 clamp(26px, 2.1vw, 34px)/1.05 var(--font-display);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.apt__more-text {
+  max-width: 30ch;
+  font-size: 17px;
+}
+.apt-more .btn {
+  height: 54px;
+  font-size: 16px;
 }
 
 /* a pile of other apartments' photos that fans out once the card is seen */
 .more__prints {
   position: relative;
   align-self: stretch;
-  height: clamp(130px, 21vh, 190px);
-  margin-bottom: auto;
+  height: clamp(150px, 15vw, 210px);
+  margin: auto 0;
 }
 .more__print {
   --x: 26%;
@@ -331,11 +427,11 @@ html.intro .fan__card {
   position: absolute;
   left: 0;
   top: 0;
-  width: 38%;
+  width: 44%;
   aspect-ratio: 4 / 3;
   margin: 0;
-  padding: 6px;
-  border-radius: 16px;
+  padding: 5px;
+  border-radius: 14px;
   background: var(--paper);
   box-shadow: 0 2px 4px rgb(6 32 28 / 0.25), 0 18px 32px -14px rgb(6 32 28 / 0.6);
   translate: var(--x) var(--y);
@@ -347,32 +443,51 @@ html.intro .fan__card {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 11px;
+  border-radius: 10px;
 }
-/* resting pile: slightly askew, one on top of another */
 .more__print:nth-child(1) { --r: -5deg; }
 .more__print:nth-child(2) { --r: 3deg; }
 .more__print:nth-child(3) { --r: -2deg; }
 .more__print:nth-child(4) { --r: 6deg; }
-/* fanned out */
-.is-seen .more__print:nth-child(1) { --x: 0%; --y: 22%; --r: -10deg; }
-.is-seen .more__print:nth-child(2) { --x: 46%; --y: 0%; --r: -3deg; }
-.is-seen .more__print:nth-child(3) { --x: 92%; --y: 18%; --r: 5deg; }
-.is-seen .more__print:nth-child(4) { --x: 138%; --y: 0%; --r: 11deg; }
+.is-seen .more__print:nth-child(1) { --x: -4%; --y: 46%; --r: -9deg; }
+.is-seen .more__print:nth-child(2) { --x: 34%; --y: 6%; --r: -3deg; }
+.is-seen .more__print:nth-child(3) { --x: 72%; --y: 40%; --r: 5deg; }
+.is-seen .more__print:nth-child(4) { --x: 112%; --y: 2%; --r: 10deg; }
 @media (hover: hover) and (pointer: fine) {
-  .apt--more:hover .more__print {
+  .apt-more:hover .more__print {
     transition-delay: 0ms;
     translate: var(--x) calc(var(--y) - 8%);
   }
 }
-.apt__more-title {
-  font: 700 clamp(30px, 2.8vw, 46px)/1.05 var(--font-display);
-  letter-spacing: -0.02em;
-  text-wrap: balance;
+
+.catalog__more {
+  justify-self: center;
+  height: 56px;
+  padding: 0 30px;
+  border: 1px solid color-mix(in srgb, var(--sky-ink) 30%, transparent);
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--sky-ink) 8%, transparent);
+  color: var(--sky-ink);
+  font: 600 17px/1 var(--font-text);
+  cursor: pointer;
+  transition: background-color 200ms var(--ease-out), scale 140ms var(--ease-out);
 }
-.apt__more-text {
-  max-width: 30ch;
-  font-size: 20px;
+.catalog__more[hidden] {
+  display: none;
+}
+.catalog__more:active {
+  scale: 0.97;
+}
+@media (hover: hover) and (pointer: fine) {
+  .catalog__more:hover {
+    background: color-mix(in srgb, var(--sky-ink) 16%, transparent);
+  }
+}
+
+@media (max-width: 1240px) and (min-width: 1000px) {
+  .catalog__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* ---------- comfort: the quilt ---------- */

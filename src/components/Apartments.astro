@@ -1,6 +1,7 @@
 ---
-// Apartments ride sideways while the visitor scrolls down (pinned pan in motion.ts).
-// Each panel: a photo stage that swaps on thumbnail hover, big numbers, one button.
+// The catalogue: filter chips, a grid of compact cards (photos swap on the
+// thumbnails), the first few shown and the rest a tap away. Filtering and
+// «show all» reflow with GSAP Flip (catalog.ts). Works without JS: all shown.
 import { Image } from 'astro:assets';
 import print1 from '../assets/photos/a2-bed.jpg';
 import print2 from '../assets/photos/a1-studio.jpg';
@@ -19,6 +20,7 @@ interface Props {
 const { lang } = Astro.props;
 const t = getDict(lang);
 const a = t.apartments;
+const GROUP_GUESTS = 4; // «for a group»: this many guests or more
 
 /** Short plain label that goes into the WhatsApp message. */
 const waLabel = (apt: Apartment): string =>
@@ -30,6 +32,28 @@ const facts = (apt: Apartment) => [
   { label: a.floorLabel, value: apt.floor },
   { label: a.guestsLabel, value: apt.guests, prefix: lang === 'ru' ? 'до' : '' },
 ];
+
+const rooms = (apt: Apartment): number => Number.parseInt(plain(apt.rooms), 10) || 0;
+const guests = (apt: Apartment): number => Number.parseInt(plain(apt.guests), 10) || 0;
+
+const FILTERS = [
+  { id: 'all', label: a.filters.all, test: () => true },
+  { id: 'r1', label: a.filters.r1, test: (apt: Apartment) => rooms(apt) === 1 },
+  { id: 'r2', label: a.filters.r2, test: (apt: Apartment) => rooms(apt) === 2 },
+  { id: 'r3', label: a.filters.r3, test: (apt: Apartment) => rooms(apt) >= 3 },
+  { id: 'group', label: a.filters.group, test: (apt: Apartment) => guests(apt) >= GROUP_GUESTS },
+]
+  .filter((f) => APARTMENTS.some(f.test)) // a chip that would show nothing is left out
+  .map((f) => ({ ...f, count: APARTMENTS.filter(f.test).length }));
+
+/** Space-separated filter ids each card belongs to (read by catalog.ts). */
+const tags = (apt: Apartment): string => FILTERS.filter((f) => f.test(apt)).map((f) => f.id).join(' ');
+
+const note = (apt: Apartment): string | null => {
+  if (apt.demo) return a.demoListing;
+  if (DEMO) return a.demoPhotos;
+  return null;
+};
 ---
 <section id="apartments" class="apts" aria-labelledby="apartments-title">
   <header class="section-head section-head--sky">
@@ -37,75 +61,91 @@ const facts = (apt: Apartment) => [
     <p class="section-lead" data-rise>{a.lead}</p>
   </header>
 
-  <div class="apts__pin" data-apts-pin>
-    <div class="apts__track" data-apts-track>
-      {APARTMENTS.map((apt, index) => (
-        <article class="apt" aria-labelledby={`apt-${apt.id}`} data-apt style={`--n:${index}`}>
-          <div class="apt__stage" data-stage>
-            <div class="apt__frames">
+  <div class="catalog" data-catalog>
+    <div class="catalog__filters" role="group" aria-label={a.filtersLabel}>
+      {FILTERS.map((f, i) => (
+        <button class="chip" type="button" data-filter={f.id} aria-pressed={i === 0 ? 'true' : 'false'}>
+          {f.label}
+          <span class="chip__count">{f.count}</span>
+        </button>
+      ))}
+    </div>
+
+    <ul class="catalog__grid" data-catalog-grid>
+      {APARTMENTS.map((apt) => (
+        <li class="apt-card" data-card data-tags={tags(apt)}>
+          <article class="apt-card__inner" aria-labelledby={`apt-${apt.id}`}>
+            <div class="apt-card__stage" data-stage>
               {apt.photos.map((photo, i) => (
                 <Image
-                  class:list={['apt__frame', { 'is-active': i === 0 }]}
+                  class:list={['apt-card__frame', { 'is-active': i === 0 }]}
                   src={photo.src}
                   alt={photo.alt[lang]}
-                  widths={[640, 960, 1280]}
-                  sizes="(min-width: 1200px) 44vw, 90vw"
+                  widths={[480, 720, 960]}
+                  sizes="(min-width: 1000px) 30vw, 90vw"
+                  loading="lazy"
                   data-frame={i}
                 />
               ))}
-            </div>
-            {apt.photos.length > 1 && (
-              <div class="apt__thumbs" role="group" aria-label={fmt(a.photoCount, { n: apt.photos.length })}>
-                {apt.photos.map((photo, i) => (
-                  <button class:list={['apt__thumb', { 'is-active': i === 0 }]} type="button" data-thumb={i} aria-label={photo.alt[lang]}>
-                    <Image src={photo.src} alt="" width={120} />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div class="apt__info">
-            {apt.availability && SHOW_TODO_MARKS && (
-              <p class="apt__note"><Text value={apt.availability[lang]} /></p>
-            )}
-            <h3 id={`apt-${apt.id}`} class="apt__street">{apt.street[lang]}</h3>
-            <dl class="apt__facts">
-              {facts(apt).map((fact) => (
-                <div class="apt__fact">
-                  <dt>{fact.label}</dt>
-                  <dd>
-                    {fact.prefix && <span class="apt__unit">{fact.prefix}</span>}
-                    <Text value={fact.value} />
-                    {fact.unit && <span class="apt__unit">{fact.unit}</span>}
-                  </dd>
+              <p class="apt-card__price">{fmt(a.price, { price: formatPrice(apt.price) })}</p>
+              {apt.photos.length > 1 && (
+                <div class="apt-card__thumbs" role="group" aria-label={fmt(a.photoCount, { n: apt.photos.length })}>
+                  {apt.photos.map((photo, i) => (
+                    <button class:list={['apt-card__thumb', { 'is-active': i === 0 }]} type="button" data-thumb={i} aria-label={photo.alt[lang]}>
+                      <Image src={photo.src} alt="" width={96} />
+                    </button>
+                  ))}
                 </div>
-              ))}
-            </dl>
-            <p class="apt__price">{fmt(a.price, { price: formatPrice(apt.price) })}</p>
-            <WaLink lang={lang} apartment={waLabel(apt)} />
-            {DEMO ? (
-              <p class="apt__note apt__note--quiet">{a.demoPhotos}</p>
-            ) : !PHOTOS_MATCH_CONFIRMED && (
-              <p class="apt__note apt__note--quiet"><Text value={todo(a.photoMatch)} /></p>
-            )}
-          </div>
-        </article>
+              )}
+            </div>
+
+            <div class="apt-card__body">
+              {apt.availability && SHOW_TODO_MARKS && (
+                <p class="apt__note"><Text value={apt.availability[lang]} /></p>
+              )}
+              <h3 id={`apt-${apt.id}`} class="apt-card__street">{apt.street[lang]}</h3>
+              <dl class="apt-card__facts">
+                {facts(apt).map((fact) => (
+                  <div class="apt-card__fact">
+                    <dt>{fact.label}</dt>
+                    <dd>
+                      {fact.prefix && <span class="apt-card__unit">{fact.prefix}</span>}
+                      <Text value={fact.value} />
+                      {fact.unit && <span class="apt-card__unit">{fact.unit}</span>}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              <WaLink lang={lang} apartment={waLabel(apt)} block />
+              {note(apt) ? (
+                <p class="apt-card__note">{note(apt)}</p>
+              ) : !PHOTOS_MATCH_CONFIRMED && (
+                <p class="apt-card__note"><Text value={todo(a.photoMatch)} /></p>
+              )}
+            </div>
+          </article>
+        </li>
       ))}
 
-      <article class="apt apt--more" aria-labelledby="apt-more" data-more>
-        {/* a little pile of other apartments: they fan out when the card is seen */}
-        <div class="more__prints" aria-hidden="true">
-          {[print1, print2, print3, print4].map((src, i) => (
-            <figure class="more__print" style={`--i:${i}`}>
-              <Image src={src} alt="" widths={[240, 360]} sizes="180px" loading="lazy" />
-            </figure>
-          ))}
-        </div>
-        <h3 id="apt-more" class="apt__more-title">{a.moreTitle}</h3>
-        <p class="apt__more-text">{a.moreText}</p>
-        <WaLink lang={lang} tone="light" size="lg" />
-      </article>
-    </div>
+      <li class="apt-card apt-card--more" data-card data-tags={FILTERS.map((f) => f.id).join(' ')} data-keep>
+        <article class="apt-more" aria-labelledby="apt-more" data-more>
+          {/* a little pile of other apartments: they fan out when the card is seen */}
+          <div class="more__prints" aria-hidden="true">
+            {[print1, print2, print3, print4].map((src, i) => (
+              <figure class="more__print" style={`--i:${i}`}>
+                <Image src={src} alt="" widths={[240, 360]} sizes="180px" loading="lazy" />
+              </figure>
+            ))}
+          </div>
+          <h3 id="apt-more" class="apt__more-title">{a.moreTitle}</h3>
+          <p class="apt__more-text">{a.moreText}</p>
+          <WaLink lang={lang} tone="light" block />
+        </article>
+      </li>
+    </ul>
+
+    <button class="catalog__more" type="button" data-catalog-more data-label={a.showAll} hidden>
+      {fmt(a.showAll, { n: APARTMENTS.length })}
+    </button>
   </div>
 </section>

@@ -112,121 +112,55 @@
     font-size: 17px;
   }
 
-  /* apartments: a native swipe row, the next card peeks in */
+  /* apartments: one column of cards; the chips scroll sideways in one row */
   .apts {
     padding-top: 40px;
   }
-  .apts__pin {
-    height: auto;
-    display: block;
-    padding: 0;
-    overflow: visible;
+  .catalog {
+    gap: 18px;
   }
-  .apts__track {
-    flex-direction: row;
-    gap: 12px;
-    padding: 4px var(--gutter) 24px;
+  .catalog__filters {
+    flex-wrap: nowrap;
+    margin: 0 calc(var(--gutter) * -1);
+    padding: 2px var(--gutter) 4px;
     overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: var(--gutter);
     overscroll-behavior-x: contain;
     scrollbar-width: none;
-    will-change: auto;
   }
-  .apts__track::-webkit-scrollbar {
+  .catalog__filters::-webkit-scrollbar {
     display: none;
   }
-  .apt,
-  .apt--more {
-    flex: 0 0 86%;
-    width: auto;
-    height: auto;
+  .chip {
+    flex: none;
+    height: 44px;
+    padding-left: 16px;
+    font-size: 15px;
+  }
+  .catalog__grid {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto 1fr; /* photo, then info that fills the rest */
-    border-radius: 28px;
-    scroll-snap-align: start;
-    box-shadow: var(--shadow-soft);
+    gap: 16px;
   }
-  .apt__stage {
-    aspect-ratio: 4 / 3;
-  }
-  .apt__frames {
-    inset: 0;
-  }
-  .apt__thumbs {
-    left: 12px;
-    bottom: 12px;
-    gap: 6px;
-  }
-  .apt__thumb {
-    width: 46px;
-    height: 46px;
-    border-radius: 12px;
-  }
-  .apt__info {
-    justify-content: flex-start;
-    gap: 14px;
-    padding: 22px 20px 20px;
-  }
-  .apt__street {
-    font-size: 26px;
-  }
-  .apt__facts {
-    grid-template-columns: repeat(4, auto);
-    justify-content: space-between;
-    gap: 6px 10px;
-    padding: 16px 0;
-  }
-  .apt__fact dt {
-    font-size: 12px;
-  }
-  .apt__fact dd {
+  .apt-card__street {
     font-size: 22px;
   }
-  .apt__unit {
-    font-size: 13px;
+  .apt-card__fact dd {
+    font-size: 18px;
   }
-  .apt__price {
-    margin-top: auto; /* price and button drop to the card's foot */
-    font-size: 17px;
+  .apt-card--more .apt-more {
+    min-height: 400px;
   }
-  .apt__info .btn {
-    width: 100%;
-    justify-content: center;
-  }
-  .apt--more {
-    align-items: stretch; /* full-width button, never wider than the card */
-    min-width: 0;
-    /* the button lines up with the apartment cards, whose note sits below it */
-    padding: 28px 22px 56px;
-    min-height: 420px;
-  }
-  .apt__more-title {
-    font-size: clamp(24px, 7vw, 30px);
-  }
-  /* the pile of photos fills the empty top of the card, centred in it */
   .more__prints {
-    height: clamp(190px, 54vw, 250px);
-    margin: auto 0;
+    height: clamp(180px, 50vw, 230px);
   }
   .more__print {
-    width: 52%;
-    padding: 5px;
-    border-radius: 14px;
+    width: 50%;
   }
-  .more__print img {
-    border-radius: 10px;
-  }
-  .is-seen .more__print:nth-child(1) { --x: -4%; --y: 66%; --r: -9deg; }
-  .is-seen .more__print:nth-child(2) { --x: 30%; --y: 26%; --r: -3deg; }
-  .is-seen .more__print:nth-child(3) { --x: 62%; --y: 62%; --r: 5deg; }
-  .is-seen .more__print:nth-child(4) { --x: 90%; --y: 22%; --r: 10deg; }
-  .apt__more-text {
-    font-size: 17px;
-  }
-  .apt--more .btn {
+  .is-seen .more__print:nth-child(1) { --x: -4%; --y: 52%; --r: -9deg; }
+  .is-seen .more__print:nth-child(2) { --x: 30%; --y: 12%; --r: -3deg; }
+  .is-seen .more__print:nth-child(3) { --x: 62%; --y: 48%; --r: 5deg; }
+  .is-seen .more__print:nth-child(4) { --x: 94%; --y: 8%; --r: 10deg; }
+  .catalog__more {
     width: 100%;
-    justify-content: center;
   }
 
   /* the quilt: two columns, photos and the guest's words full width */
@@ -576,7 +510,8 @@
   }
   .btn,
   .round-btn,
-  .apt__thumb,
+  .apt-card__thumb,
+  .chip,
   .bottom-bar__call,
   .header__lang,
   summary {

@@ -1,7 +1,6 @@
 ---
 // First viewport: the sky is the stage. Left: what, how much, one button.
 // Right: a fan of real photos that leans toward the cursor.
-// The sun itself (in the WebGL sky) is clickable: evening preview.
 import { Image } from 'astro:assets';
 import living from '../assets/photos/a1-living.jpg';
 import bedroom from '../assets/photos/a3-bedroom.jpg';
@@ -72,5 +71,4 @@ const photos = [
     ))}
   </div>
 
-  <button class="sun-hit" type="button" data-sun aria-label={t.clock.sunHint} title={t.clock.sunHint}></button>
 </section>

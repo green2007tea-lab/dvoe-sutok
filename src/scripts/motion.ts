@@ -7,7 +7,8 @@ import { SplitText } from 'gsap/SplitText';
 import Lenis from 'lenis';
 import { initNowClock } from './nowclock';
 import { createSky, cssSky, type SkyRenderer } from './sky';
-import { almatyHourNow, phaseOf, skyAt, wrapHour } from './daycycle';
+import { almatyHourNow, phaseOf, skyAt } from './daycycle';
+import { initCatalog } from './catalog';
 import {
   countUp,
   initFan,
@@ -23,8 +24,6 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 const EXPO = 'expo.out';
-const EVENING_HOUR = 19.7;
-const MORNING_HOUR = 9.5;
 const DESKTOP = '(min-width: 1000px)';
 const REAL_CLOCK_MS = 10_000;
 const PORTRAIT_RATIO = 0.8; // narrower than this is a phone held upright
@@ -36,27 +35,21 @@ const VELOCITY_FULL = 60; // Lenis px/frame that counts as a full time-lapse
 // The page always opens at night (moon high, stars out); scrolling then runs
 // the day from there. Not the real hour: a daytime start looked flat.
 const START_HOUR = 23.6;
-const day = { start: START_HOUR, progress: 0, preview: 0, target: EVENING_HOUR };
-let previewOn = false;
+const day = { start: START_HOUR, progress: 0 };
 let sky: SkyRenderer | null = null;
 let lastDark: boolean | null = null;
 let lastGreeting = '';
 
-const sunHit = document.querySelector<HTMLButtonElement>('[data-sun]');
 const greeting = document.querySelector<HTMLElement>('[data-greeting]');
 
 function currentHour(): number {
-  const base = day.start + day.progress * 24;
-  if (!day.preview) return base;
-  let delta = wrapHour(day.target - base);
-  if (delta > 12) delta -= 24;
-  return base + delta * day.preview;
+  return day.start + day.progress * 24;
 }
 
-/** The greeting follows the light: real time, or the previewed morning/evening. */
-function renderGreeting(hour: number): void {
+/** The greeting speaks to the visitor's own time of day. */
+function renderGreeting(): void {
   if (!greeting) return;
-  const phase = phaseOf(day.preview > 0.5 ? hour : almatyHourNow());
+  const phase = phaseOf(almatyHourNow());
   const text = greeting.dataset[phase] ?? '';
   if (!text || text === lastGreeting) return;
   lastGreeting = text;
@@ -82,30 +75,7 @@ function renderDay(): void {
     document.documentElement.dataset.sky = state.isDark ? 'dark' : 'light';
     lastDark = state.isDark;
   }
-  renderGreeting(hour);
-  if (sunHit) {
-    sunHit.style.transform = `translate(${state.body[0] * window.innerWidth}px, ${(1 - state.body[1]) * window.innerHeight}px)`;
-  }
-}
-
-function setPreview(on: boolean, duration: number): void {
-  previewOn = on;
-  // Pick the target only from a settled sky, so a mid-way reversal never jumps.
-  if (on && day.preview === 0) day.target = skyAt(currentHour()).isSun ? EVENING_HOUR : MORNING_HOUR;
-  gsap.to(day, {
-    preview: on ? 1 : 0,
-    duration: reduce ? 0 : duration,
-    ease: 'power2.inOut',
-    overwrite: true,
-    onUpdate: renderDay,
-  });
-}
-
-/** The sun or moon flares for a moment when it is touched. */
-function pulseSky(): void {
-  if (reduce || !sky) return;
-  const pulse = { v: 1 };
-  gsap.to(pulse, { v: 0, duration: 0.6, ease: 'expo.out', onUpdate: () => sky?.setPulse(pulse.v) });
+  renderGreeting();
 }
 
 function initRealClock(): void {
@@ -151,22 +121,6 @@ function initDay(): void {
     });
   }
 
-  // Joy: tap the sun to see the evening light, or the moon to see the morning;
-  // tap again to come back. A second tap mid-way reverses at once.
-  sunHit?.addEventListener('click', () => {
-    pulseSky();
-    setPreview(!previewOn, 1.4);
-  });
-  ScrollTrigger.create({
-    trigger: '.hero',
-    start: 'top top',
-    end: 'bottom top',
-    onLeave: () => {
-      sunHit?.classList.add('is-away');
-      if (previewOn || day.preview) setPreview(false, 0.8);
-    },
-    onEnterBack: () => sunHit?.classList.remove('is-away'),
-  });
   window.addEventListener('resize', renderDay);
   initRealClock();
 }
@@ -261,49 +215,19 @@ function heroExit(): void {
     .to('.hero__copy', { yPercent: -10, opacity: 0.15, ease: 'none' }, 0);
 }
 
-/** Apartments ride sideways; the track leans with scroll speed. */
-function apartmentsPan(): void {
-  const pin = document.querySelector<HTMLElement>('[data-apts-pin]');
-  const track = document.querySelector<HTMLElement>('[data-apts-track]');
-  if (!pin || !track) return;
-  const distance = () => track.scrollWidth - window.innerWidth;
-  const skewTo = gsap.quickTo(track, 'skewX', { duration: 0.6, ease: 'power3.out' });
-
-  const pan = gsap.to(track, {
-    x: () => -distance(),
-    ease: 'none',
-    scrollTrigger: {
-      trigger: pin,
-      start: 'top top',
-      end: () => `+=${distance()}`,
-      pin: true,
-      scrub: true, // Lenis already smooths the scroll; a second lag feels heavy
-      refreshPriority: 1,
-      invalidateOnRefresh: true,
-      onUpdate: (self) => skewTo(gsap.utils.clamp(-5, 5, self.getVelocity() / -450)),
-      onScrubComplete: () => skewTo(0),
-    },
-  });
-
-  gsap.utils.toArray<HTMLElement>('[data-apt]').forEach((apt) => {
-    const frames = apt.querySelector<HTMLElement>('.apt__frames');
-    const stage = apt.querySelector<HTMLElement>('.apt__stage');
-    if (frames) {
-      gsap.fromTo(frames, { xPercent: -5 }, {
-        xPercent: 5,
-        ease: 'none',
-        scrollTrigger: { trigger: apt, containerAnimation: pan, start: 'left right', end: 'right left', scrub: true },
-      });
-    }
-    // The photo settles into its frame as the card rides in: a slow zoom
-    // inside the stage, so nothing behind the photo ever shows.
-    if (stage) {
-      gsap.fromTo(stage.querySelector('.apt__frames'), { scale: 1.18 }, {
-        scale: 1,
-        ease: 'none',
-        scrollTrigger: { trigger: apt, containerAnimation: pan, start: 'left 100%', end: 'left 35%', scrub: true },
-      });
-    }
+/** Catalogue cards rise in a gentle stagger the first time the grid is seen. */
+function catalogReveal(): void {
+  const grid = document.querySelector<HTMLElement>('[data-catalog-grid]');
+  if (!grid) return;
+  const shown = gsap.utils.toArray<HTMLElement>('[data-card]').filter((card) => !card.hidden);
+  gsap.from(shown, {
+    y: 40,
+    opacity: 0,
+    duration: 0.9,
+    ease: EXPO,
+    stagger: 0.07,
+    clearProps: 'transform,opacity', // Flip takes over the cards afterwards
+    scrollTrigger: { trigger: grid, start: 'top 85%', once: true },
   });
 }
 
@@ -440,6 +364,7 @@ function boot(): void {
   initKeyTurn(reduce);
   initStages();
   initReviews(reduce);
+  initCatalog(reduce);
   bottomBar();
   morePile();
 
@@ -458,11 +383,11 @@ function boot(): void {
   // Pinned scenes first: triggers below them must measure with the pin spacer.
   gsap.matchMedia().add(DESKTOP, () => {
     heroExit();
-    apartmentsPan();
   });
   header();
   heroIntro();
   sectionReveals();
+  catalogReveal();
   quilt();
   stepsArc();
   marquee();

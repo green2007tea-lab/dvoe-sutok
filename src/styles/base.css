@@ -203,40 +203,6 @@ main,
   z-index: 1;
 }
 
-.sun-hit {
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 4;
-  width: 132px;
-  height: 132px;
-  margin: -66px 0 0 -66px;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  cursor: pointer;
-}
-.sun-hit::after {
-  /* a ring that hints the sun is a button, only for a fine pointer */
-  content: '';
-  position: absolute;
-  inset: 26px;
-  border: 1.5px solid rgb(255 255 255 / 0.55);
-  border-radius: 50%;
-  opacity: 0;
-  scale: 0.8;
-  transition: opacity 240ms var(--ease-out), scale 400ms var(--ease-out);
-}
-@media (hover: hover) and (pointer: fine) {
-  .sun-hit:hover::after {
-    opacity: 1;
-    scale: 1;
-  }
-}
-.sun-hit.is-away {
-  display: none;
-}
-
 /* ---------- buttons ---------- */
 
 .btn {
